@@ -16,8 +16,8 @@ data class MetaDataModel(var type: RevoltEvent.Type) {
     fun getJson(): JsonObject {
         val json = JsonObject()
         json.add(ID, JsonPrimitive(id))
-        json.add(TIME_STAMP, JsonPrimitive(type.toString()))
-        json.add(TYPE, JsonPrimitive(timestamp))
+        json.add(TYPE, JsonPrimitive(type.toString()))
+        json.add(TIME_STAMP, JsonPrimitive(timestamp))
         return json
     }
 

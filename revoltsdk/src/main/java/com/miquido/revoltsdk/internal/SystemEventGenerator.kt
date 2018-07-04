@@ -22,7 +22,7 @@ class SystemEventGenerator(private val screenSizeProvider: ScreenSizeProvider) {
         sessionEvent.deviceScreenResolutionWidth = screenSizeProvider.sizePx.x
         sessionEvent.appVersion = BuildConfig.VERSION_CODE.toString()
         sessionEvent.sdkVersion = BuildConfig.VERSION_CODE.toString()
-        sessionEvent.language = Locale.getDefault().displayLanguage
+        sessionEvent.language = Locale.getDefault().language
         sessionEvent.location = "Location"
         return RevoltEvent(sessionEvent)
     }

@@ -21,7 +21,7 @@ class AppModule {
         return Revolt.Builder()
                 .with(context)
                 .secretKey("aaa")
-                .endpoint("aa")
+                .endpoint("http://www.mocky.io/v2/")
                 .build()
     }
 }

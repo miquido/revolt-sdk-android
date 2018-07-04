@@ -14,6 +14,6 @@ import retrofit2.http.POST
  */
 interface RevoltApi {
 
-    @POST("")
+    @POST("/5b3cc45e3100002c006ddeb5")
     fun send(@Body event: JsonObject): Call<ResponseModel>
 }
