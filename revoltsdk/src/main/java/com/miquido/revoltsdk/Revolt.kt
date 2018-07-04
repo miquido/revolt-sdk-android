@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import com.miquido.revoltsdk.internal.*
 import com.miquido.revoltsdk.internal.model.RevoltEvent
-import com.miquido.revoltsdk.internal.model.SystemEvent
 import timber.log.Timber
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -15,15 +14,17 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                                  context: Context) {
 
     private val sendEventUseCase: SendEventUseCase
-    private val sessionEventGenerator: SessionEventGenerator
+    private val systemEventGenerator: SystemEventGenerator
     private val revoltRepository: RevoltRepository
 
     init {
         val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint)
         revoltRepository = RevoltRepository(networkConfiguration.revoltApi)
         sendEventUseCase = SendEventUseCase(revoltRepository)
-        sessionEventGenerator = SessionEventGenerator(ScreenSizeProvider(context))
-        Timber.plant(Timber.DebugTree())
+        systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         startSession()
     }
 
@@ -37,7 +38,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
     private fun startSession() {
-        sendEventUseCase.send(RevoltEvent(SystemEvent()))
+        sendEventUseCase.send(systemEventGenerator.generateEvent())
     }
 
     class Builder {

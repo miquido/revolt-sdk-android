@@ -2,6 +2,7 @@ package com.miquido.revoltsdk.internal
 
 import android.os.Build
 import com.miquido.revoltsdk.BuildConfig
+import com.miquido.revoltsdk.internal.model.RevoltEvent
 import com.miquido.revoltsdk.internal.model.SystemEvent
 import java.util.*
 
@@ -9,8 +10,8 @@ import java.util.*
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class SessionEventGenerator(private val screenSizeProvider: ScreenSizeProvider) {
-    fun generateEvent(): SystemEvent {
+class SystemEventGenerator(private val screenSizeProvider: ScreenSizeProvider) {
+    fun generateEvent(): RevoltEvent {
         val sessionEvent = SystemEvent()
         sessionEvent.deviceBrand = Build.MANUFACTURER
         sessionEvent.deviceModel = Build.MODEL
@@ -23,6 +24,6 @@ class SessionEventGenerator(private val screenSizeProvider: ScreenSizeProvider) 
         sessionEvent.sdkVersion = BuildConfig.VERSION_CODE.toString()
         sessionEvent.language = Locale.getDefault().displayLanguage
         sessionEvent.location = "Location"
-        return sessionEvent
+        return RevoltEvent(sessionEvent)
     }
 }

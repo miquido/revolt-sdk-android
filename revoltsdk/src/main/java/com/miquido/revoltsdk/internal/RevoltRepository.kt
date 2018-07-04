@@ -16,7 +16,7 @@ class RevoltRepository(private val revoltApi: RevoltApi) {
         //TODO store in the database
         revoltApi.send(event.createJson()).enqueue(object : Callback<ResponseModel> {
             override fun onFailure(call: Call<ResponseModel>?, t: Throwable?) {
-                Timber.e(t?.message)
+                Timber.e(t)
             }
 
             override fun onResponse(call: Call<ResponseModel>?, response: Response<ResponseModel>?) {
