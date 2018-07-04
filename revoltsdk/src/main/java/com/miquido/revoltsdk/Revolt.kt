@@ -4,13 +4,15 @@ import android.Manifest
 import android.content.Context
 import com.miquido.revoltsdk.internal.*
 import com.miquido.revoltsdk.internal.model.RevoltEvent
+import com.miquido.revoltsdk.internal.model.SystemEvent
+import timber.log.Timber
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class Revolt private constructor(private val revoltConfiguration: RevoltConfiguration,
-                                 private val context: Context) {
+class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
+                                 context: Context) {
 
     private val sendEventUseCase: SendEventUseCase
     private val sessionEventGenerator: SessionEventGenerator
@@ -21,15 +23,21 @@ class Revolt private constructor(private val revoltConfiguration: RevoltConfigur
         revoltRepository = RevoltRepository(networkConfiguration.revoltApi)
         sendEventUseCase = SendEventUseCase(revoltRepository)
         sessionEventGenerator = SessionEventGenerator(ScreenSizeProvider(context))
+        Timber.plant(Timber.DebugTree())
         startSession()
     }
 
+    /**
+     * Send an event to the Revolt backend.
+     * Method is asynchronous. Events are sent in configurable batches or buffered for later in case of lack of internet connection.
+     * @param revoltEvent RevoltEvent to send.
+     */
     fun sendEvent(revoltEvent: RevoltEvent) {
         sendEventUseCase.send(revoltEvent)
     }
 
     private fun startSession() {
-
+        sendEventUseCase.send(RevoltEvent(SystemEvent()))
     }
 
     class Builder {

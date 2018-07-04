@@ -25,6 +25,11 @@ class RevoltEvent {
         metadataModel = MetaDataModel(revoltEvent.getType())
     }
 
+    constructor(revoltEvent: Event) {
+        this.revoltEvent = revoltEvent
+        metadataModel = MetaDataModel(revoltEvent.getType())
+    }
+
     fun createJson(): JsonObject {
         return generateJson(revoltEvent.getJson(), metadataModel.getJson())
     }
