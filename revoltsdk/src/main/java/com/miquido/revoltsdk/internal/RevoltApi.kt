@@ -1,8 +1,9 @@
-package com.miquido.revoltsdk
+package com.miquido.revoltsdk.internal
 
+import com.miquido.revoltsdk.internal.model.RevoltEvent
+import com.miquido.revoltsdk.internal.model.ResponseModel
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Path
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>

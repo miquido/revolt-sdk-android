@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk
+package com.miquido.revoltsdk.internal
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -2,17 +2,34 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
+import com.miquido.revoltsdk.internal.*
+import com.miquido.revoltsdk.internal.model.RevoltEvent
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class Revolt private constructor(networkConfiguration: NetworkConfiguration) {
+class Revolt private constructor(private val revoltConfiguration: RevoltConfiguration,
+                                 private val context: Context) {
 
-    private var sendEventUseCase = SendEventUseCase(networkConfiguration.revoltApi)
+    private val sendEventUseCase: SendEventUseCase
+    private val sessionEventGenerator: SessionEventGenerator
+    private val revoltRepository: RevoltRepository
+
+    init {
+        val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint)
+        revoltRepository = RevoltRepository(networkConfiguration.revoltApi)
+        sendEventUseCase = SendEventUseCase(revoltRepository)
+        sessionEventGenerator = SessionEventGenerator(ScreenSizeProvider(context))
+        startSession()
+    }
 
     fun sendEvent(revoltEvent: RevoltEvent) {
         sendEventUseCase.send(revoltEvent)
+    }
+
+    private fun startSession() {
+
     }
 
     class Builder {
@@ -63,8 +80,16 @@ class Revolt private constructor(networkConfiguration: NetworkConfiguration) {
             if (!hasPermission(context!!, Manifest.permission.INTERNET)) {
                 throw IllegalArgumentException("INTERNET permission is required.")
             }
-            val networkConfiguration = NetworkConfiguration(endpoint)
-            return Revolt(networkConfiguration)
+
+            return Revolt(createConfiguration(), context!!)
+        }
+
+        private fun createConfiguration(): RevoltConfiguration {
+            return RevoltConfiguration(secretKey!!,
+                    endpoint,
+                    maxBatchSize,
+                    eventDelay,
+                    offlineMaxSize)
         }
     }
 }
