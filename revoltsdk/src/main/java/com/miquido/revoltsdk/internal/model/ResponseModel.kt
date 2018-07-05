@@ -4,9 +4,8 @@ package com.miquido.revoltsdk.internal.model
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class ResponseModel {
-    var eventsAccepted: List<Int>? = null
-    val eventError: EventError? = null
+data class ResponseModel(var eventsAccepted: Int,
+                         val eventError: EventError?) {
 
     class EventError {
         var eventOffset: Int? = null

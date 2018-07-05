@@ -5,8 +5,9 @@ package com.miquido.revoltsdk.internal.configuration
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 data class RevoltConfiguration(
-        var secretKey: String,
+        var trackingId: String,
         var endpoint: String,
         var maxBatchSize: Int,
         var eventDelay: Int,
-        var offlineMaxSize: Int)
+        var offlineMaxSize: Int,
+        var secretKey: String)

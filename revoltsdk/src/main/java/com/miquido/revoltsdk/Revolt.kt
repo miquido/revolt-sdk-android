@@ -25,9 +25,11 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
     init {
         val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint,
-                revoltConfiguration.secretKey,
-                configurationRepository.getAppInstanceId())
-        revoltRepository = RevoltRepository(networkConfiguration.revoltApi)
+                configurationRepository.getAppInstanceId(),
+                revoltConfiguration.trackingId,
+                revoltConfiguration.secretKey
+        )
+        revoltRepository = RevoltRepository(networkConfiguration.getRevoltApi())
         sendEventUseCase = SendEventUseCase(revoltRepository)
         systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))
         if (BuildConfig.DEBUG) {
@@ -50,11 +52,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
     class Builder {
-        private var secretKey: String? = null
+        private var trackingId: String? = null
         private var endpoint: String = DefaultConfiguration.URL
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
         private var eventDelay: Int = DefaultConfiguration.EVENT_DELAY
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
+        private var secretKey: String? = null
         private var context: Context? = null
 
         fun with(context: Context): Revolt.Builder {
@@ -62,13 +65,18 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return this
         }
 
-        fun secretKey(secretKey: String): Revolt.Builder {
-            this.secretKey = secretKey
+        fun trackingId(trackingId: String): Revolt.Builder {
+            this.trackingId = trackingId
             return this
         }
 
         fun maxBatchSize(size: Int): Revolt.Builder {
             this.maxBatchSize = size
+            return this
+        }
+
+        fun secretKey(secretKey: String): Revolt.Builder {
+            this.secretKey = secretKey
             return this
         }
 
@@ -91,6 +99,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             if (context == null) {
                 throw IllegalArgumentException("Context must not be null")
             }
+            if (trackingId == null) {
+                throw IllegalStateException("Tracking id must be initialized")
+            }
             if (secretKey == null) {
                 throw IllegalStateException("Secret key must be initialized")
             }
@@ -102,11 +113,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         }
 
         private fun createConfiguration(): RevoltConfiguration {
-            return RevoltConfiguration(secretKey!!,
+            return RevoltConfiguration(trackingId!!,
                     endpoint,
                     maxBatchSize,
                     eventDelay,
-                    offlineMaxSize)
+                    offlineMaxSize,
+                    secretKey!!)
         }
     }
 }
