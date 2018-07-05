@@ -14,7 +14,7 @@ import timber.log.Timber
 class RevoltRepository(private val revoltApi: RevoltApi) {
     fun sendEvent(event: RevoltEvent) {
         //TODO store in the database
-        revoltApi.send(event.createJson()).enqueue(object : Callback<ResponseModel> {
+        revoltApi.send(event.createJson().packWithArray()).enqueue(object : Callback<ResponseModel> {
             override fun onFailure(call: Call<ResponseModel>?, t: Throwable?) {
                 Timber.e(t)
             }

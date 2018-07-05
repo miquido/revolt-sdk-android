@@ -1,6 +1,7 @@
 package com.miquido.revoltsdk.internal.model
 
 import android.os.Bundle
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 
@@ -9,14 +10,10 @@ import com.google.gson.JsonPrimitive
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class CustomEvent(private val bundle: Bundle) : Event {
+class CustomEvent(private val obj: Any) : Event {
 
     override fun getJson(): JsonObject {
-        val json = JsonObject()
-        for (key in bundle.keySet()) {
-            json.add(key, JsonPrimitive(bundle.get(key).toString()))
-        }
-        return json
+        return Gson().toJsonTree(obj).asJsonObject
     }
 
     override fun getType(): RevoltEvent.Type {

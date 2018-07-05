@@ -1,7 +1,4 @@
-package com.miquido.revoltsdk.internal
-
-import android.content.Context
-import com.miquido.revoltsdk.internal.DefaultConfiguration
+package com.miquido.revoltsdk.internal.configuration
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>

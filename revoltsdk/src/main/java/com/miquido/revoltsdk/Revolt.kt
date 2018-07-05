@@ -3,7 +3,12 @@ package com.miquido.revoltsdk
 import android.Manifest
 import android.content.Context
 import com.miquido.revoltsdk.internal.*
+import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
+import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
+import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
 import com.miquido.revoltsdk.internal.model.RevoltEvent
+import com.miquido.revoltsdk.internal.network.NetworkConfiguration
+import com.miquido.revoltsdk.internal.network.SendEventUseCase
 import timber.log.Timber
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -16,9 +21,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     private val sendEventUseCase: SendEventUseCase
     private val systemEventGenerator: SystemEventGenerator
     private val revoltRepository: RevoltRepository
+    private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
     init {
-        val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint)
+        val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint,
+                revoltConfiguration.secretKey,
+                configurationRepository.getAppInstanceId())
         revoltRepository = RevoltRepository(networkConfiguration.revoltApi)
         sendEventUseCase = SendEventUseCase(revoltRepository)
         systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))

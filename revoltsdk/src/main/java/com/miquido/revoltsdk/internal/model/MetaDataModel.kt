@@ -25,6 +25,6 @@ data class MetaDataModel(var type: RevoltEvent.Type) {
         const val ID: String = "id"
         const val TIME_STAMP: String = "timestamp"
         const val TYPE: String = "type"
-        const val METADATA_MODEL = "metadata"
+        const val METADATA_MODEL = "meta"
     }
 }

@@ -22,6 +22,6 @@ class MainActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        sendEventButton.setOnClickListener { revoltSDK.sendEvent(RevoltEvent("aaa", "bbb")) }
+        sendEventButton.setOnClickListener { revoltSDK.sendEvent(RevoltEvent(Pair("a", "b"))) }
     }
 }

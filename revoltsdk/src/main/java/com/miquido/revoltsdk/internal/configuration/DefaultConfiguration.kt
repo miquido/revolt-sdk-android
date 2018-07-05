@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk.internal
+package com.miquido.revoltsdk.internal.configuration
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>

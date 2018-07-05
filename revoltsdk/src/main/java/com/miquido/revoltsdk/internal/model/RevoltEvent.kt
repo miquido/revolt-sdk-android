@@ -13,8 +13,8 @@ class RevoltEvent {
     private val revoltEvent: Event
     private val metadataModel: MetaDataModel
 
-    constructor(bundle: Bundle) {
-        revoltEvent = CustomEvent(bundle)
+    constructor(any: Any) {
+        revoltEvent = CustomEvent(any)
         metadataModel = MetaDataModel(revoltEvent.getType())
     }
 

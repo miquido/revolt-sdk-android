@@ -20,8 +20,8 @@ class AppModule {
     fun provideRevoltSdk(context: Context): Revolt {
         return Revolt.Builder()
                 .with(context)
-                .secretKey("aaa")
-                .endpoint("http://www.mocky.io/v2/")
+                .secretKey("11111")
+                .endpoint("http://revoltapi.eu-central-1.elasticbeanstalk.com")
                 .build()
     }
 }

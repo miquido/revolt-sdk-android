@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk.internal
+package com.miquido.revoltsdk.internal.network
 
 import com.miquido.revoltsdk.internal.RevoltRepository
 import com.miquido.revoltsdk.internal.model.RevoltEvent
