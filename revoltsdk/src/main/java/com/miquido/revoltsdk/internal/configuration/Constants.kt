@@ -6,7 +6,9 @@ package com.miquido.revoltsdk.internal.configuration
  */
 class Constants {
     companion object {
-        const val USERNAME_HEADER: String = "username"
-        const val PASSWORD_HEADER: String = "password"
+        const val AUTHORIZATION_HEADER: String = "Authorization"
+        const val CUSTOM_EVENT: String = "Custom"
+        const val SYSTEM_EVENT: String = "System"
+        const val USER_EVENT: String = "User"
     }
 }

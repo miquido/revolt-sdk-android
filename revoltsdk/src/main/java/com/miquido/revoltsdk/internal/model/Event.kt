@@ -8,7 +8,7 @@ import com.google.gson.JsonObject
  */
 interface Event {
     fun getJson(): JsonObject
-    fun getType(): RevoltEvent.Type
+    fun getType(): String
 
     companion object {
         const val EVENT_MODEL = "data"

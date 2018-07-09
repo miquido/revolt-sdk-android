@@ -2,7 +2,6 @@ package com.miquido.revoltsdk.internal
 
 import android.content.Context
 import android.graphics.Point
-import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.WindowManager
@@ -11,10 +10,10 @@ import android.view.WindowManager
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class ScreenSizeProvider(val context: Context) {
+class ScreenSizeProvider(context: Context) {
 
-    var sizePx: Point
-    var sizeIn: Double
+    val sizePx: Point
+    val sizeIn: Double
 
     init {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

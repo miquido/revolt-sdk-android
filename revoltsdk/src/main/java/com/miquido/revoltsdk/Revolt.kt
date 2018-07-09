@@ -2,13 +2,16 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
-import com.miquido.revoltsdk.internal.*
+import com.miquido.revoltsdk.internal.RevoltRepository
+import com.miquido.revoltsdk.internal.ScreenSizeProvider
+import com.miquido.revoltsdk.internal.SystemEventGenerator
 import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
-import com.miquido.revoltsdk.internal.model.RevoltEvent
-import com.miquido.revoltsdk.internal.network.NetworkConfiguration
-import com.miquido.revoltsdk.internal.network.SendEventUseCase
+import com.miquido.revoltsdk.internal.database.DatabaseRepository
+import com.miquido.revoltsdk.internal.hasPermission
+import com.miquido.revoltsdk.internal.network.BackendRepository
+import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
 import timber.log.Timber
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -18,19 +21,25 @@ import timber.log.Timber
 class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                                  context: Context) {
 
-    private val sendEventUseCase: SendEventUseCase
     private val systemEventGenerator: SystemEventGenerator
     private val revoltRepository: RevoltRepository
     private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
+    companion object {
+        fun builder(): BuilderContext {
+            return BuilderContext()
+        }
+    }
+
     init {
-        val networkConfiguration = NetworkConfiguration(revoltConfiguration.endpoint,
+        val revoltApiBuilder = RevoltApiBuilder(revoltConfiguration.endpoint,
                 configurationRepository.getAppInstanceId(),
                 revoltConfiguration.trackingId,
                 revoltConfiguration.secretKey
         )
-        revoltRepository = RevoltRepository(networkConfiguration.getRevoltApi())
-        sendEventUseCase = SendEventUseCase(revoltRepository)
+        val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
+        val databaseRepository = DatabaseRepository()
+        revoltRepository = RevoltRepository(backendRepository, databaseRepository)
         systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -44,39 +53,50 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
      * @param revoltEvent RevoltEvent to send.
      */
     fun sendEvent(revoltEvent: RevoltEvent) {
-        sendEventUseCase.send(revoltEvent)
+        revoltRepository.addEvent(revoltEvent)
     }
 
     private fun startSession() {
-        sendEventUseCase.send(systemEventGenerator.generateEvent())
+        revoltRepository.addEvent(systemEventGenerator.generateEvent())
     }
 
-    class Builder {
-        private var trackingId: String? = null
-        private var endpoint: String = DefaultConfiguration.URL
+    class BuilderContext {
+        fun with(context: Context): BuilderSecretKey {
+            return BuilderSecretKey(context)
+        }
+    }
+
+    class BuilderSecretKey(private val context: Context) {
+        fun secretKey(secretKey: String): BuilderTrackingId {
+            return BuilderTrackingId(context, secretKey)
+        }
+    }
+
+    class BuilderTrackingId(private val context: Context,
+                            private val secretKey: String) {
+        fun trackingId(trackingId: String): BuilderEndpoint {
+            return BuilderEndpoint(context, secretKey, trackingId)
+        }
+    }
+
+    class BuilderEndpoint(private val context: Context,
+                          private val secretKey: String,
+                          private val trackingId: String) {
+        fun endpoint(endpoint: String): Builder {
+            return Builder(context, secretKey, trackingId, endpoint)
+        }
+    }
+
+    class Builder(private var context: Context,
+                  private var secretKey: String,
+                  private var trackingId: String,
+                  private var endpoint: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
         private var eventDelay: Int = DefaultConfiguration.EVENT_DELAY
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
-        private var secretKey: String? = null
-        private var context: Context? = null
-
-        fun with(context: Context): Revolt.Builder {
-            this.context = context
-            return this
-        }
-
-        fun trackingId(trackingId: String): Revolt.Builder {
-            this.trackingId = trackingId
-            return this
-        }
 
         fun maxBatchSize(size: Int): Revolt.Builder {
             this.maxBatchSize = size
-            return this
-        }
-
-        fun secretKey(secretKey: String): Revolt.Builder {
-            this.secretKey = secretKey
             return this
         }
 
@@ -90,35 +110,21 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return this
         }
 
-        fun endpoint(endpoint: String): Revolt.Builder {
-            this.endpoint = endpoint
-            return this
-        }
-
         fun build(): Revolt {
-            if (context == null) {
-                throw IllegalArgumentException("Context must not be null")
-            }
-            if (trackingId == null) {
-                throw IllegalStateException("Tracking id must be initialized")
-            }
-            if (secretKey == null) {
-                throw IllegalStateException("Secret key must be initialized")
-            }
-            if (!hasPermission(context!!, Manifest.permission.INTERNET)) {
+            if (!hasPermission(context, Manifest.permission.INTERNET)) {
                 throw IllegalArgumentException("INTERNET permission is required.")
             }
 
-            return Revolt(createConfiguration(), context!!)
+            return Revolt(createConfiguration(), context)
         }
 
         private fun createConfiguration(): RevoltConfiguration {
-            return RevoltConfiguration(trackingId!!,
+            return RevoltConfiguration(trackingId,
                     endpoint,
                     maxBatchSize,
                     eventDelay,
                     offlineMaxSize,
-                    secretKey!!)
+                    secretKey)
         }
     }
 }

@@ -13,7 +13,7 @@ import java.security.MessageDigest
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-@SuppressLint("HardwareIds", "ApplySharedPref")
+@SuppressLint("HardwareIds")
 class ConfigurationRepository(private val context: Context) {
 
     private val sharedPref: SharedPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
@@ -36,7 +36,7 @@ class ConfigurationRepository(private val context: Context) {
 
             sharedPref.edit()
                     .putString(APP_ID, byteData.toHex())
-                    .commit()
+                    .apply()
         }
     }
 

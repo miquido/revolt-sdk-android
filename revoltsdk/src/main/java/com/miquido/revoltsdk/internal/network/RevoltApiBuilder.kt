@@ -2,6 +2,7 @@ package com.miquido.revoltsdk.internal.network
 
 import com.miquido.revoltsdk.internal.RevoltApi
 import com.miquido.revoltsdk.internal.configuration.Constants
+import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,18 +11,17 @@ import retrofit2.converter.gson.GsonConverterFactory
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class NetworkConfiguration(private val endpointUrl: String,
-                           private val appInstanceId: String,
-                           private val trackingId: String,
-                           private val secretKey: String) {
+class RevoltApiBuilder(private val endpointUrl: String,
+                       private val appInstanceId: String,
+                       private val trackingId: String,
+                       private val secretKey: String) {
 
     fun getRevoltApi(): RevoltApi {
         val client = OkHttpClient.Builder()
                 .addInterceptor {
                     val request = it.request()
                             .newBuilder()
-                            .addHeader(Constants.USERNAME_HEADER, trackingId)
-                            .addHeader(Constants.PASSWORD_HEADER, secretKey)
+                            .addHeader(Constants.AUTHORIZATION_HEADER, Credentials.basic(trackingId, secretKey))
                             .build()
                     it.proceed(request)
                 }

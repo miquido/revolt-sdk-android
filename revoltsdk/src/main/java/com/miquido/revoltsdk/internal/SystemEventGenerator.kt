@@ -2,9 +2,9 @@ package com.miquido.revoltsdk.internal
 
 import android.os.Build
 import com.miquido.revoltsdk.BuildConfig
-import com.miquido.revoltsdk.internal.model.RevoltEvent
+import com.miquido.revoltsdk.RevoltEvent
 import com.miquido.revoltsdk.internal.model.SystemEvent
-import java.util.*
+import java.util.Locale
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>

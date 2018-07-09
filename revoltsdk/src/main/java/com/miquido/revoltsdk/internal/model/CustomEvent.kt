@@ -1,9 +1,8 @@
 package com.miquido.revoltsdk.internal.model
 
-import android.os.Bundle
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import com.miquido.revoltsdk.internal.configuration.Constants
 
 
 /** Created by MiQUiDO on 03.07.2018.
@@ -16,7 +15,7 @@ class CustomEvent(private val obj: Any) : Event {
         return Gson().toJsonTree(obj).asJsonObject
     }
 
-    override fun getType(): RevoltEvent.Type {
-        return RevoltEvent.Type.CUSTOM
+    override fun getType(): String {
+        return Constants.CUSTOM_EVENT
     }
 }

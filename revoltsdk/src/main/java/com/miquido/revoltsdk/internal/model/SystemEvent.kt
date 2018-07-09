@@ -2,6 +2,7 @@ package com.miquido.revoltsdk.internal.model
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.miquido.revoltsdk.internal.configuration.Constants
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
@@ -36,8 +37,8 @@ data class SystemEvent(var deviceBrand: String? = null,
         return json
     }
 
-    override fun getType(): RevoltEvent.Type {
-        return RevoltEvent.Type.SYSTEM
+    override fun getType(): String {
+        return Constants.SYSTEM_EVENT
     }
 
     companion object {
