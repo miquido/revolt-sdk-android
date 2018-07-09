@@ -38,11 +38,7 @@ internal data class SystemEvent(var deviceBrand: String? = null,
     }
 
     override fun getType(): String {
-        return SYSTEM_EVENT
-    }
-
-    companion object {
-        const val SYSTEM_EVENT: String = "System"
+        return "System"
     }
 }
 
