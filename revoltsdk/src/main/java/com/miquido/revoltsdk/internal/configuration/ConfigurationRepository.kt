@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.provider.Settings
 import com.miquido.revoltsdk.BuildConfig
 import com.miquido.revoltsdk.internal.toHex
-import java.nio.charset.Charset
 import java.security.MessageDigest
 
 /** Created by MiQUiDO on 05.07.2018.

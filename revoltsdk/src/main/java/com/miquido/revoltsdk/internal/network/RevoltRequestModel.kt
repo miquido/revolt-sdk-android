@@ -1,8 +1,6 @@
 package com.miquido.revoltsdk.internal.network
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.miquido.revoltsdk.RevoltEvent
 import com.miquido.revoltsdk.internal.model.Event
 import com.miquido.revoltsdk.internal.model.MetaDataModel
 

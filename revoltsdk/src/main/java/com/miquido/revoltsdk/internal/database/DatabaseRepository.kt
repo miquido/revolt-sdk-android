@@ -1,6 +1,5 @@
 package com.miquido.revoltsdk.internal.database
 
-import com.miquido.revoltsdk.RevoltEvent
 import com.miquido.revoltsdk.internal.EventsRepository
 import com.miquido.revoltsdk.internal.model.Event
 

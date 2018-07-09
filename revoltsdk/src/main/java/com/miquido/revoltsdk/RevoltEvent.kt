@@ -1,6 +1,5 @@
 package com.miquido.revoltsdk
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.miquido.revoltsdk.internal.model.Event
 

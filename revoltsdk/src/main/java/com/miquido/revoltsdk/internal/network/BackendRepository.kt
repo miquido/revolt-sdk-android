@@ -1,11 +1,9 @@
 package com.miquido.revoltsdk.internal.network
 
-import com.miquido.revoltsdk.RevoltEvent
 import com.miquido.revoltsdk.internal.EventsRepository
 import com.miquido.revoltsdk.internal.RevoltApi
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.model.Event
-import com.miquido.revoltsdk.internal.model.MetaDataModel
 import com.miquido.revoltsdk.internal.model.ResponseModel
 import com.miquido.revoltsdk.internal.packWithArray
 import retrofit2.Call
