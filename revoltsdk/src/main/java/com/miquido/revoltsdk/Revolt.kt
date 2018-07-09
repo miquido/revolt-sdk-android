@@ -41,7 +41,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository()
         revoltRepository = RevoltRepository(backendRepository, databaseRepository)
-        systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))
+        systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
         startSession()

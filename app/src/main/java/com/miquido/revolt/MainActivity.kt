@@ -3,7 +3,7 @@ package com.miquido.revolt
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.RevoltEvents
+import com.miquido.revoltsdk.RevoltEvent
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -21,6 +21,6 @@ class MainActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        sendEventButton.setOnClickListener { revoltSDK.sendEvent(RevoltEvents.fromKeyValue("MY_TYPE", "a", "b")) }
+        sendEventButton.setOnClickListener { revoltSDK.sendEvent(RevoltEvent("MY_TYPE", "a", "b")) }
     }
 }
