@@ -13,6 +13,7 @@ import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
+import com.miquido.revoltsdk.internal.network.RevoltRequestModel
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
@@ -49,14 +50,16 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     /**
      * Send an event to the Revolt backend.
      * Method is asynchronous. Events are sent in configurable batches or buffered for later in case of lack of internet connection.
-     * @param revoltEvent RevoltEvent to send.
+     * @param event Event to send.
      */
-    fun sendEvent(revoltEvent: RevoltEvent) {
-        revoltRepository.addEvent(revoltEvent)
+    fun sendEvent(event: Event) {
+        val revoltRequestModel = RevoltRequestModel(event)
+        revoltRepository.addEvent(revoltRequestModel)
     }
 
     private fun startSession() {
-        revoltRepository.addEvent(systemEventGenerator.generateEvent())
+        val revoltRequestModel = RevoltRequestModel(systemEventGenerator.generateEvent())
+        revoltRepository.addEvent(revoltRequestModel)
     }
 
     class BuilderContext {

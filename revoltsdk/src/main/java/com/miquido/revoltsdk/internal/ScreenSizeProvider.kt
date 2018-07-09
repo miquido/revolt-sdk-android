@@ -10,7 +10,7 @@ import android.view.WindowManager
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class ScreenSizeProvider(context: Context) {
+internal class ScreenSizeProvider(context: Context) {
 
     val sizePx: Point
     val sizeIn: Double

@@ -1,22 +1,22 @@
-package com.miquido.revoltsdk
+package com.miquido.revoltsdk.internal.model
 
 import com.google.gson.JsonObject
-import com.miquido.revoltsdk.internal.model.Event
+import com.miquido.revoltsdk.Event
 
 /** Created by MiQUiDO on 29.06.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class RevoltEvent : Event {
+internal class EventImpl : Event {
     private val revoltData: JsonObject
     private val type: String
 
-    constructor(jsonObject: JsonObject, type: String) {
+    constructor(type: String, jsonObject: JsonObject) {
         this.revoltData = jsonObject
         this.type = type
     }
 
-    constructor(key: String, value: String, type: String) {
+    constructor(type: String, key: String, value: String) {
         val jsonObject = JsonObject()
         jsonObject.addProperty(key, value)
         this.revoltData = jsonObject

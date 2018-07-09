@@ -2,12 +2,13 @@ package com.miquido.revoltsdk.internal.model
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.miquido.revoltsdk.Event
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-data class SystemEvent(var deviceBrand: String? = null,
+internal data class SystemEvent(var deviceBrand: String? = null,
                        var deviceScreenSize: Double? = null,
                        var deviceScreenResolutionWidth: Int? = null,
                        var deviceScreenResolutionHeight: Int? = null,

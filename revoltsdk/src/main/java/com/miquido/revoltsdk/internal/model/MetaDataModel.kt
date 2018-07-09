@@ -8,7 +8,7 @@ import java.util.UUID
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-data class MetaDataModel(private var type: String) {
+internal data class MetaDataModel(private var type: String) {
     private var id: String = UUID.randomUUID().toString()
     private var timestamp: Long = System.currentTimeMillis()
 
@@ -24,6 +24,5 @@ data class MetaDataModel(private var type: String) {
         const val ID: String = "id"
         const val TIMESTAMP: String = "timestamp"
         const val TYPE: String = "type"
-        const val METADATA_MODEL = "meta"
     }
 }

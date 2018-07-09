@@ -6,7 +6,7 @@ import com.miquido.revoltsdk.RevoltLogLevel
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-data class RevoltConfiguration(
+internal data class RevoltConfiguration(
         var trackingId: String,
         var endpoint: String,
         var maxBatchSize: Int,

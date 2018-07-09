@@ -13,7 +13,7 @@ import java.security.MessageDigest
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 @SuppressLint("HardwareIds")
-class ConfigurationRepository(private val context: Context) {
+internal class ConfigurationRepository(private val context: Context) {
 
     private val sharedPref: SharedPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
 

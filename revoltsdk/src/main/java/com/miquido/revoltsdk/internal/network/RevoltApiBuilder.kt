@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class RevoltApiBuilder(private val endpointUrl: String,
+internal class RevoltApiBuilder(private val endpointUrl: String,
                        private val appInstanceId: String,
                        private val trackingId: String,
                        private val secretKey: String) {

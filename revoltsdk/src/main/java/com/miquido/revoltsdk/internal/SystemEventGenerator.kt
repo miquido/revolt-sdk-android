@@ -2,7 +2,7 @@ package com.miquido.revoltsdk.internal
 
 import android.os.Build
 import com.miquido.revoltsdk.BuildConfig
-import com.miquido.revoltsdk.internal.model.Event
+import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.model.SystemEvent
 import java.util.Locale
 
@@ -10,7 +10,7 @@ import java.util.Locale
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class SystemEventGenerator(private val screenSizeProvider: ScreenSizeProvider) {
+internal class SystemEventGenerator(private val screenSizeProvider: ScreenSizeProvider) {
     fun generateEvent(): Event {
         val sessionEvent = SystemEvent()
         sessionEvent.deviceBrand = Build.MANUFACTURER

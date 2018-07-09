@@ -10,14 +10,14 @@ import com.google.gson.JsonObject
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-fun hasPermission(context: Context, permission: String): Boolean {
+internal fun hasPermission(context: Context, permission: String): Boolean {
     return context.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED
 }
 
-fun JsonObject.packWithArray(): JsonArray {
+internal fun JsonObject.packWithArray(): JsonArray {
     val jsonArray = JsonArray()
     jsonArray.add(this)
     return jsonArray
 }
 
-fun ByteArray.toHex() = this.joinToString(separator = "") { it.toInt().and(0xff).toString(16).padStart(2, '0') }
+internal fun ByteArray.toHex() = this.joinToString(separator = "") { it.toInt().and(0xff).toString(16).padStart(2, '0') }

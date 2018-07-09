@@ -8,7 +8,7 @@ import com.miquido.revoltsdk.RevoltLogLevel.*
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-object RevoltLogger {
+internal object RevoltLogger {
     private var logLevel = RevoltLogLevel.WARN
     private const val TAG = "Revolt-SDK"
 

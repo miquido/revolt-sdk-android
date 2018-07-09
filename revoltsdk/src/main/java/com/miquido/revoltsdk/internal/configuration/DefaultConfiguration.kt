@@ -6,7 +6,7 @@ import com.miquido.revoltsdk.RevoltLogLevel
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class DefaultConfiguration {
+internal class DefaultConfiguration {
     companion object {
         const val URL: String = "http://revoltapi.eu-central-1.elasticbeanstalk.com"
         const val MAX_BATCH_SIZE: Int = 20

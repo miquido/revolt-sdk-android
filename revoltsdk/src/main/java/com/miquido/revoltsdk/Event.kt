@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk.internal.model
+package com.miquido.revoltsdk
 
 import com.google.gson.JsonObject
 
@@ -9,8 +9,4 @@ import com.google.gson.JsonObject
 interface Event {
     fun getJson(): JsonObject
     fun getType(): String
-
-    companion object {
-        const val EVENT_MODEL = "data"
-    }
 }
