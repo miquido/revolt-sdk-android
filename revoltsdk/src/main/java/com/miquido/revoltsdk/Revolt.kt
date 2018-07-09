@@ -10,9 +10,9 @@ import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.internal.hasPermission
+import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
-import timber.log.Timber
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
@@ -41,9 +41,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         val databaseRepository = DatabaseRepository()
         revoltRepository = RevoltRepository(backendRepository, databaseRepository)
         systemEventGenerator = SystemEventGenerator(ScreenSizeProvider(context))
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+        RevoltLogger.init(revoltConfiguration.logLevel)
+
         startSession()
     }
 
@@ -61,39 +60,37 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
     class BuilderContext {
-        fun with(context: Context): BuilderSecretKey {
-            return BuilderSecretKey(context)
+        fun with(context: Context): BuilderTrackingId {
+            return BuilderTrackingId(context)
         }
     }
 
-    class BuilderSecretKey(private val context: Context) {
-        fun secretKey(secretKey: String): BuilderTrackingId {
-            return BuilderTrackingId(context, secretKey)
+    class BuilderTrackingId(private val context: Context) {
+        fun trackingId(trackingId: String): BuilderSecretKey {
+            return BuilderSecretKey(context, trackingId)
         }
     }
 
-    class BuilderTrackingId(private val context: Context,
-                            private val secretKey: String) {
-        fun trackingId(trackingId: String): BuilderEndpoint {
-            return BuilderEndpoint(context, secretKey, trackingId)
+    class BuilderSecretKey(private val context: Context,
+                           private val trackingId: String) {
+        fun secretKey(secretKey: String): Builder {
+            return Builder(context, trackingId, secretKey)
         }
     }
 
-    class BuilderEndpoint(private val context: Context,
-                          private val secretKey: String,
-                          private val trackingId: String) {
-        fun endpoint(endpoint: String): Builder {
-            return Builder(context, secretKey, trackingId, endpoint)
-        }
-    }
 
     class Builder(private var context: Context,
-                  private var secretKey: String,
                   private var trackingId: String,
-                  private var endpoint: String) {
+                  private var secretKey: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
         private var eventDelay: Int = DefaultConfiguration.EVENT_DELAY
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
+        private var endpoint: String = DefaultConfiguration.URL
+        private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
+
+        fun logLevel(revoltLogLevel: RevoltLogLevel) {
+            this.revoltLogLevel = revoltLogLevel
+        }
 
         fun maxBatchSize(size: Int): Revolt.Builder {
             this.maxBatchSize = size
@@ -107,6 +104,11 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
         fun offlineQueueMaxSize(size: Int): Revolt.Builder {
             this.offlineMaxSize = size
+            return this
+        }
+
+        fun endpoint(endpoint: String): Revolt.Builder {
+            this.endpoint = endpoint
             return this
         }
 
@@ -124,7 +126,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                     maxBatchSize,
                     eventDelay,
                     offlineMaxSize,
-                    secretKey)
+                    secretKey,
+                    revoltLogLevel)
         }
     }
 }

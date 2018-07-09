@@ -1,7 +1,6 @@
 package com.miquido.revoltsdk.internal.network
 
 import com.miquido.revoltsdk.internal.RevoltApi
-import com.miquido.revoltsdk.internal.configuration.Constants
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -21,7 +20,7 @@ class RevoltApiBuilder(private val endpointUrl: String,
                 .addInterceptor {
                     val request = it.request()
                             .newBuilder()
-                            .addHeader(Constants.AUTHORIZATION_HEADER, Credentials.basic(trackingId, secretKey))
+                            .addHeader(AUTHORIZATION_HEADER, Credentials.basic(trackingId, secretKey))
                             .build()
                     it.proceed(request)
                 }
@@ -33,5 +32,9 @@ class RevoltApiBuilder(private val endpointUrl: String,
                 .client(client.build())
                 .build()
         return retrofit.create(RevoltApi::class.java)
+    }
+
+    companion object {
+        const val AUTHORIZATION_HEADER: String = "Authorization"
     }
 }
