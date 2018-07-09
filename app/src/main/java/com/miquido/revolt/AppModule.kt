@@ -18,10 +18,10 @@ class AppModule {
     @Singleton
     @Provides
     fun provideRevoltSdk(context: Context): Revolt {
-        return Revolt.Builder()
+        return Revolt.builder()
                 .with(context)
-                .secretKey("aaa")
-                .endpoint("aa")
+                .trackingId("111111")
+                .secretKey("haselko")
                 .build()
     }
 }

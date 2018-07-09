@@ -1,1 +1,1 @@
-include ':app', ':revolt-sdk', ':revoltsdk'
+include ':app', ':revoltsdk'
