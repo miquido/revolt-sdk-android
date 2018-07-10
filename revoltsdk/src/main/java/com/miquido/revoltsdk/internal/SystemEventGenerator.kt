@@ -1,8 +1,9 @@
 package com.miquido.revoltsdk.internal
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import com.miquido.revoltsdk.BuildConfig
+import android.provider.Settings
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.model.SystemEvent
 import java.util.Locale
@@ -13,6 +14,7 @@ import java.util.Locale
  */
 internal class SystemEventGenerator(private val screenSizeProvider: ScreenSizeProvider,
                                     private val context: Context) {
+    @SuppressLint("HardwareIds")
     fun generateEvent(): Event {
         val sessionEvent = SystemEvent()
         sessionEvent.deviceBrand = Build.MANUFACTURER
@@ -23,7 +25,7 @@ internal class SystemEventGenerator(private val screenSizeProvider: ScreenSizePr
         sessionEvent.deviceScreenResolutionHeight = screenSizeProvider.sizePx.y
         sessionEvent.deviceScreenResolutionWidth = screenSizeProvider.sizePx.x
         sessionEvent.appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        sessionEvent.sdkVersion = BuildConfig.VERSION_CODE.toString()
+        sessionEvent.sdkVersion = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         sessionEvent.language = Locale.getDefault().toString()
         sessionEvent.location = "Location"
         sessionEvent.code = "${context.packageName}.${context.applicationInfo.loadLabel(context.packageManager)}"
