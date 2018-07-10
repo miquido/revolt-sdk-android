@@ -23,7 +23,7 @@ internal class AppInstanceDataEventGenerator(private val screenSizeProvider: Scr
                 addProperty("type", "mobile")
                 addProperty("version", context.packageManager.getPackageInfo(context.packageName, 0).versionName)
                 addProperty("sdkVersion", BuildConfig.VERSION_CODE.toString())
-                addProperty("code", context.javaClass.name)
+                addProperty("code", context.packageName)
             })
             add("device", JsonObject().apply {
                 addProperty("brand", Build.MANUFACTURER)
