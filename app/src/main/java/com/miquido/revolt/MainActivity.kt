@@ -21,6 +21,19 @@ class MainActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        sendEventButton.setOnClickListener { revoltSDK.sendEvent(RevoltEvent("MY_TYPE", "a", "b")) }
+        sendEventButton.setOnClickListener {
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE1", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE2", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE3", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE4", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE5", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE6", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE7", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE8", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE9", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE10", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE11", "a", "b"))
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE12", "a", "b"))
+        }
     }
 }

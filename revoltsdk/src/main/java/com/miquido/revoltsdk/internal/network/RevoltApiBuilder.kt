@@ -27,7 +27,7 @@ internal class RevoltApiBuilder(private val endpointUrl: String,
 
 
         val retrofit = Retrofit.Builder()
-                .baseUrl("$endpointUrl/api/v1/$trackingId/$appInstanceId/")
+                .baseUrl("$endpointUrl/$trackingId/$appInstanceId/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client.build())
                 .build()

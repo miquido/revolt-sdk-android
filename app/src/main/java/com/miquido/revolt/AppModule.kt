@@ -2,8 +2,10 @@ package com.miquido.revolt
 
 import android.content.Context
 import com.miquido.revoltsdk.Revolt
+import com.miquido.revoltsdk.RevoltLogLevel
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /** Created by MiQUiDO on 02.07.2018.
@@ -22,6 +24,9 @@ class AppModule {
                 .with(context)
                 .trackingId("111111")
                 .secretKey("haselko")
+                .eventDelay(5, TimeUnit.SECONDS)
+                .maxBatchSize(10)
+                .logLevel(RevoltLogLevel.DEBUG)
                 .build()
     }
 }
