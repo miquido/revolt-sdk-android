@@ -1,5 +1,6 @@
 package com.miquido.revoltsdk.internal.log
 
+import android.os.Looper
 import android.util.Log
 import com.miquido.revoltsdk.RevoltLogLevel
 import com.miquido.revoltsdk.RevoltLogLevel.*
@@ -54,7 +55,8 @@ internal object RevoltLogger {
 
     fun d(message: String) {
         if (shouldShowLog(DEBUG)) {
-            Log.d(TAG, message)
+            //TODO remove displaying thread info
+            Log.d(TAG, "$message mainThread: ${Looper.getMainLooper().isCurrentThread}")
         }
     }
 

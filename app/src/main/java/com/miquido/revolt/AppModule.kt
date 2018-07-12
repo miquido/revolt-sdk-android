@@ -22,8 +22,8 @@ class AppModule {
     fun provideRevoltSdk(context: Context): Revolt {
         return Revolt.builder()
                 .with(context)
-                .trackingId("111111")
-                .secretKey("haselko")
+                .trackingId("revolttest")
+                .secretKey("ZjdMyTrmjVDC8Wr8")
                 .eventDelay(5, TimeUnit.SECONDS)
                 .maxBatchSize(10)
                 .logLevel(RevoltLogLevel.DEBUG)

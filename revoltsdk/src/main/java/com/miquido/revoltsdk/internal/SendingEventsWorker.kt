@@ -3,6 +3,7 @@ package com.miquido.revoltsdk.internal
 import androidx.work.Worker
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
+import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 
 /** Created by MiQUiDO on 10.07.2018.
@@ -12,10 +13,15 @@ import com.miquido.revoltsdk.internal.network.BackendRepository
 internal class SendingEventsWorker : Worker() {
 
     override fun doWork(): Result {
-        val batchSize = inputData.getInt(BATCH_SIZE, DefaultConfiguration.MAX_BATCH_SIZE)
+        RevoltLogger.d("Worker started ($id) - ${Thread.currentThread().name}")
+        var batchSize = inputData.getInt(BATCH_SIZE, DefaultConfiguration.MAX_BATCH_SIZE)
+        if (batchSize > DefaultConfiguration.MAX_BATCH_SIZE) {
+            batchSize = DefaultConfiguration.MAX_BATCH_SIZE
+        }
         val events = DatabaseRepository.getFirstEvents(batchSize)
         val response = BackendRepository.addEvents(events).execute()
         return if (response.isSuccessful) {
+            DatabaseRepository.removeElements(events.size)
             Result.SUCCESS
         } else {
             Result.FAILURE

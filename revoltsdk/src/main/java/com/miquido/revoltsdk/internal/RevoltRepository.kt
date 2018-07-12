@@ -12,7 +12,7 @@ import androidx.work.WorkStatus
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.log.RevoltLogger
-import java.util.*
+import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 03.07.2018.
@@ -22,34 +22,40 @@ import java.util.concurrent.TimeUnit
 internal class RevoltRepository(private val eventDelay: EventDelay,
                                 private val batchSize: Int) {
 
-    private var workId: UUID? = null
-    private var eventsNumber: Int = 0
+    private var workStatus: State = State.ENQUEUED
+    private var delay: Long = eventDelay.timeUnit.toMillis(eventDelay.delay)
+    private var executionTime: Long? = null
 
     fun addEvent(event: Event) {
-        DatabaseRepository.addEvent(event)
-
-        sendEvent()
+        launch {
+            DatabaseRepository.addEvent(event)
+            sendEvent()
+        }
     }
 
     private fun sendEvent() {
-        eventsNumber = DatabaseRepository.getEventsNumber()
-
-        WorkManager.getInstance()!!.beginUniqueWork("REVOLT_WORKER", ExistingWorkPolicy.REPLACE, createNewWorker()).enqueue()
-        WorkManager.getInstance()!!.getStatusById(workId!!).observeForever { t: WorkStatus? ->
-            RevoltLogger.d("Work status: ${t.toString()}")
-            if (t?.state == State.SUCCEEDED) {
-                RevoltLogger.d("Send succeeded, removing $eventsNumber")
-                if (eventsNumber >= batchSize) {
-                    DatabaseRepository.removeElements(batchSize)
-                    eventsNumber -= batchSize
-                } else {
-                    DatabaseRepository.removeElements(eventsNumber)
-                    eventsNumber = 0
-                }
-                RevoltLogger.d("Current events number: $eventsNumber")
-                RevoltLogger.d("Current events number from db: ${DatabaseRepository.getEventsNumber()}")
-                if (eventsNumber > 0) {
-                    sendEvent()
+        RevoltLogger.d("Sending event, workstatus: $workStatus")
+        if (workStatus == State.ENQUEUED) {
+            RevoltLogger.d("Work is enqueued, replacing existing")
+            if (executionTime == null) {
+                executionTime = System.currentTimeMillis() + delay
+            } else {
+                delay = executionTime!! - System.currentTimeMillis()
+            }
+            RevoltLogger.d("Starting with delay: $delay")
+            val worker = createNewWorker()
+            WorkManager.getInstance()!!.beginUniqueWork("REVOLT_WORKER", ExistingWorkPolicy.REPLACE, worker).enqueue()
+            WorkManager.getInstance()!!.getStatusById(worker.id).observeForever { t: WorkStatus? ->
+                launch {
+                    if (t?.state == State.SUCCEEDED) {
+                        RevoltLogger.d("Work succeeded ${t.id}")
+                        workStatus = State.ENQUEUED
+                        delay = eventDelay.timeUnit.toMillis(eventDelay.delay)
+                        executionTime = null
+                        if (DatabaseRepository.getEventsNumber() > 0) {
+                            sendEvent()
+                        }
+                    }
                 }
             }
         }
@@ -57,6 +63,7 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
 
 
     private fun createNewWorker(): OneTimeWorkRequest {
+
         val data = Data.Builder()
                 .putInt(SendingEventsWorker.BATCH_SIZE, batchSize).build()
 
@@ -64,19 +71,17 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-        val sendingEventWork = if (eventsNumber >= batchSize) {
+        return if (DatabaseRepository.getEventsNumber() >= batchSize) {
             OneTimeWorkRequest.Builder(SendingEventsWorker::class.java)
                     .setInputData(data)
                     .setConstraints(constraints)
                     .build()
         } else {
             OneTimeWorkRequest.Builder(SendingEventsWorker::class.java)
-                    .setInitialDelay(eventDelay.delay, eventDelay.timeUnit)
+                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                     .setInputData(data)
                     .setConstraints(constraints)
                     .build()
         }
-        workId = sendingEventWork.id
-        return sendingEventWork
     }
 }
