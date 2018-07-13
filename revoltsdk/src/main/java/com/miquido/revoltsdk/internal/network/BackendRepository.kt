@@ -3,6 +3,7 @@ package com.miquido.revoltsdk.internal.network
 import com.google.gson.Gson
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.RevoltApi
+import com.miquido.revoltsdk.internal.model.RevoltModel
 import retrofit2.Call
 
 /** Created by MiQUiDO on 09.07.2018.
@@ -16,8 +17,8 @@ internal object BackendRepository {
         this.revoltApi = revoltApi
     }
 
-    fun addEvents(events: ArrayList<Event>): Call<ResponseModel> {
-        val array = Gson().toJsonTree(events.map { RevoltRequestModel(it).createJson() }).asJsonArray
+    fun addEvents(events: ArrayList<RevoltModel>): Call<ResponseModel> {
+        val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
         return revoltApi.send(array)
     }
 }

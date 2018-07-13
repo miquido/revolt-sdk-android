@@ -12,6 +12,7 @@ import androidx.work.WorkStatus
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.log.RevoltLogger
+import com.miquido.revoltsdk.internal.model.RevoltModel
 import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.TimeUnit
 
@@ -23,35 +24,38 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
                                 private val batchSize: Int) {
 
     private var workStatus: State = State.ENQUEUED
-    private var delay: Long = eventDelay.timeUnit.toMillis(eventDelay.delay)
     private var executionTime: Long? = null
 
     fun addEvent(event: Event) {
         launch {
-            DatabaseRepository.addEvent(event)
+            DatabaseRepository.addEvent(RevoltModel(event))
             sendEvent()
         }
     }
 
     private fun sendEvent() {
         RevoltLogger.d("Sending event, workstatus: $workStatus")
+
+        //Starting new worker only if current is in ENQUEUED state, otherwise wait until worker succeeded
         if (workStatus == State.ENQUEUED) {
             RevoltLogger.d("Work is enqueued, replacing existing")
+
+            //Worker will be executed with `eventDelay` delay so we're
+            //setting `executionTime` to count delay in `setInitialDelay` method in Worker builder
             if (executionTime == null) {
-                executionTime = System.currentTimeMillis() + delay
-            } else {
-                delay = executionTime!! - System.currentTimeMillis()
+                executionTime = System.currentTimeMillis() + eventDelay.timeUnit.toMillis(eventDelay.delay)
             }
-            RevoltLogger.d("Starting with delay: $delay")
+
+            RevoltLogger.d("Starting with delay: ${executionTime!! - System.currentTimeMillis()}")
+
             val worker = createNewWorker()
             WorkManager.getInstance()!!.beginUniqueWork("REVOLT_WORKER", ExistingWorkPolicy.REPLACE, worker).enqueue()
             WorkManager.getInstance()!!.getStatusById(worker.id).observeForever { t: WorkStatus? ->
                 launch {
                     if (t?.state == State.SUCCEEDED) {
-                        RevoltLogger.d("Work succeeded ${t.id}")
                         workStatus = State.ENQUEUED
-                        delay = eventDelay.timeUnit.toMillis(eventDelay.delay)
                         executionTime = null
+                        //starting new worker only if there are any events left in the database
                         if (DatabaseRepository.getEventsNumber() > 0) {
                             sendEvent()
                         }
@@ -78,7 +82,7 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
                     .build()
         } else {
             OneTimeWorkRequest.Builder(SendingEventsWorker::class.java)
-                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                    .setInitialDelay(executionTime!! - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                     .setInputData(data)
                     .setConstraints(constraints)
                     .build()

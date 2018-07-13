@@ -1,14 +1,13 @@
-package com.miquido.revoltsdk.internal.network
+package com.miquido.revoltsdk.internal.model
 
 import com.google.gson.JsonObject
 import com.miquido.revoltsdk.Event
-import com.miquido.revoltsdk.internal.model.MetaDataModel
 
 /** Created by MiQUiDO on 09.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal data class RevoltRequestModel(private val event: Event) {
+internal data class RevoltModel(private val event: Event) {
 
     private val metaDataModel: MetaDataModel = MetaDataModel(event.getType())
 
