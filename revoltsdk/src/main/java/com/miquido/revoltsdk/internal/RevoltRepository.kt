@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit
 internal class RevoltRepository(private val eventDelay: EventDelay,
                                 private val batchSize: Int) {
 
-    private var workStatus: State = State.ENQUEUED
     private var executionTime: Long? = null
 
     fun addEvent(event: Event) {
@@ -34,11 +33,9 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
     }
 
     private fun sendEvent() {
-        RevoltLogger.d("Sending event, workstatus: $workStatus")
-
-        //Starting new worker only if current is in ENQUEUED state, otherwise wait until worker succeeded
-        if (workStatus == State.ENQUEUED) {
-            RevoltLogger.d("Work is enqueued, replacing existing")
+        //Starting new worker only if current worker hasn't started, otherwise wait until worker succeeded
+        if (executionTime == null || System.currentTimeMillis() < executionTime!!) {
+            RevoltLogger.d("Work hasn't started, replacing existing")
 
             //Worker will be executed with `eventDelay` delay so we're
             //setting `executionTime` to count delay in `setInitialDelay` method in Worker builder
@@ -53,7 +50,6 @@ internal class RevoltRepository(private val eventDelay: EventDelay,
             WorkManager.getInstance()!!.getStatusById(worker.id).observeForever { t: WorkStatus? ->
                 launch {
                     if (t?.state == State.SUCCEEDED) {
-                        workStatus = State.ENQUEUED
                         executionTime = null
                         //starting new worker only if there are any events left in the database
                         if (DatabaseRepository.getEventsNumber() > 0) {
