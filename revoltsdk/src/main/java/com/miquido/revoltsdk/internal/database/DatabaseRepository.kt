@@ -1,6 +1,5 @@
 package com.miquido.revoltsdk.internal.database
 
-import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.model.RevoltModel
 import java.util.*
 
@@ -9,7 +8,7 @@ import java.util.*
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 internal object DatabaseRepository {
-    private var list: MutableList<RevoltModel> = Collections.synchronizedList(ArrayList())
+    private var list: MutableList<RevoltModel> = ArrayList()
 
     fun getEventsNumber(): Int {
         return list.size
@@ -19,8 +18,12 @@ internal object DatabaseRepository {
         return ArrayList(list.take(number))
     }
 
-    fun removeElements(number: Int){
-        list = Collections.synchronizedList(ArrayList(list.drop(number)))
+    fun removeElements(number: Int) {
+        list = ArrayList(list.drop(number))
+    }
+
+    fun getFirstEvent(): RevoltModel {
+        return list[0]
     }
 
 

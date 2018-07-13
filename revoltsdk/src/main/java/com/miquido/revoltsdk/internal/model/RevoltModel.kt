@@ -18,6 +18,10 @@ internal data class RevoltModel(private val event: Event) {
         return json
     }
 
+    fun getTimestamp(): Long {
+        return metaDataModel.getTimestamp()
+    }
+
     companion object {
         const val METADATA = "meta"
         const val EVENT = "data"

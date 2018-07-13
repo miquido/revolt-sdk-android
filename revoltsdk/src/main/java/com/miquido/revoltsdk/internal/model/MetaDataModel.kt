@@ -20,6 +20,10 @@ internal data class MetaDataModel(private var type: String) {
         return json
     }
 
+    fun getTimestamp(): Long {
+        return timestamp
+    }
+
     companion object {
         const val ID: String = "id"
         const val TIMESTAMP: String = "timestamp"

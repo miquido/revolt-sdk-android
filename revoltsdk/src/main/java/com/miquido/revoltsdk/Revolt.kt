@@ -2,7 +2,7 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
-import com.miquido.revoltsdk.internal.RevoltRepository
+import com.miquido.revoltsdk.internal.RevoltService
 import com.miquido.revoltsdk.internal.ScreenSizeProvider
 import com.miquido.revoltsdk.internal.AppInstanceDataEventGenerator
 import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
@@ -23,7 +23,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                                  context: Context) {
 
     private val appInstanceDataEventGenerator: AppInstanceDataEventGenerator
-    private val revoltRepository: RevoltRepository
+    private val revoltService: RevoltService
     private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
     companion object {
@@ -39,7 +39,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                 revoltConfiguration.secretKey
         )
         BackendRepository.init(revoltApiBuilder.getRevoltApi())
-        revoltRepository = RevoltRepository(revoltConfiguration.eventDelay, revoltConfiguration.maxBatchSize)
+        revoltService = RevoltService(revoltConfiguration.eventDelay, revoltConfiguration.maxBatchSize)
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -52,11 +52,11 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
      * @param event Event to send.
      */
     fun sendEvent(event: Event) {
-        revoltRepository.addEvent(event)
+        revoltService.addEvent(event)
     }
 
     private fun startSession() {
-        revoltRepository.addEvent(appInstanceDataEventGenerator.generateEvent())
+        revoltService.addEvent(appInstanceDataEventGenerator.generateEvent())
     }
 
     class BuilderContext {
