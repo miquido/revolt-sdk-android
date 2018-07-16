@@ -9,6 +9,7 @@ import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
+import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
@@ -38,8 +39,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                 revoltConfiguration.trackingId,
                 revoltConfiguration.secretKey
         )
-        BackendRepository.init(revoltApiBuilder.getRevoltApi())
-        revoltService = RevoltService(revoltConfiguration.eventDelay, revoltConfiguration.maxBatchSize)
+        val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
+        val databaseRepository = DatabaseRepository()
+        revoltService = RevoltService(revoltConfiguration.eventDelay,
+                revoltConfiguration.maxBatchSize,
+                backendRepository,
+                databaseRepository)
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -79,9 +84,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
 
-    class Builder(private var context: Context,
-                  private var trackingId: String,
-                  private var secretKey: String) {
+    class Builder(private val context: Context,
+                  private val trackingId: String,
+                  private val secretKey: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
         private var eventDelay: EventDelay = DefaultConfiguration.EVENT_DELAY
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE

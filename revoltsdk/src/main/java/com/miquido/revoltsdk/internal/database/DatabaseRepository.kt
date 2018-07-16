@@ -7,8 +7,8 @@ import java.util.*
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal object DatabaseRepository {
-    private var list: MutableList<RevoltModel> = ArrayList()
+internal class DatabaseRepository {
+    private val list: MutableList<RevoltModel> = ArrayList()
 
     fun getEventsNumber(): Int {
         return list.size
@@ -19,11 +19,11 @@ internal object DatabaseRepository {
     }
 
     fun removeElements(number: Int) {
-        list = ArrayList(list.drop(number))
+        list.subList(0, number).clear()
     }
 
-    fun getFirstEvent(): RevoltModel {
-        return list[0]
+    fun getFirstEvent(): RevoltModel? {
+        return if (list.isEmpty()) null else list[0]
     }
 
 
