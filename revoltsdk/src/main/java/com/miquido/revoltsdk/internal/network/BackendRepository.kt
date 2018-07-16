@@ -14,16 +14,18 @@ internal class BackendRepository(private var revoltApi: RevoltApi) {
         val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
         val response = revoltApi.send(array).execute()
         val responseModel = response.body()
-        if (response.code() == STATUS_CODE_OK) {
-            responseModel?.responseStatus = ResponseModel.ResponseStatus.OK
-        } else {
-            responseModel?.responseStatus = ResponseModel.ResponseStatus.ERROR
+        when {
+            responseModel?.eventError?.errorCode == STATUS_CODE_WRONG_EVENT -> responseModel.responseStatus = ResponseModel.ResponseStatus.RETRY
+            response.code() == STATUS_CODE_OK -> responseModel?.responseStatus = ResponseModel.ResponseStatus.OK
+            else -> responseModel?.responseStatus = ResponseModel.ResponseStatus.ERROR
         }
 
-        return responseModel
+        return response.body()
     }
 
     companion object {
         const val STATUS_CODE_OK = 200
+        const val STATUS_CODE_SERVER_ERROR = 500
+        const val STATUS_CODE_WRONG_EVENT = 400
     }
 }

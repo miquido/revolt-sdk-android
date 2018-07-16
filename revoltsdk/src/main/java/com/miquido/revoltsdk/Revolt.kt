@@ -44,7 +44,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         revoltService = RevoltService(revoltConfiguration.eventDelay,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
-                databaseRepository)
+                databaseRepository,
+                revoltConfiguration.firstRetryTime,
+                revoltConfiguration.maxRetryTime)
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -92,6 +94,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
         private var endpoint: String = DefaultConfiguration.URL
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
+        private var firstRetryTime = DefaultConfiguration.FIRST_RETRY_TIME
+        private var maxRetryTime = DefaultConfiguration.MAX_RETRY_TIME
 
         fun logLevel(revoltLogLevel: RevoltLogLevel): Revolt.Builder {
             this.revoltLogLevel = revoltLogLevel
@@ -105,6 +109,16 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
         fun eventDelay(delay: Long, timeUnit: TimeUnit): Revolt.Builder {
             this.eventDelay = EventDelay(delay, timeUnit)
+            return this
+        }
+
+        fun firstRetrySecondsSendingTime(time: Int): Revolt.Builder {
+            this.firstRetryTime = time
+            return this
+        }
+
+        fun maxRetrySecondsSendingTime(time: Int): Revolt.Builder {
+            this.maxRetryTime = time
             return this
         }
 
@@ -130,10 +144,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return RevoltConfiguration(trackingId,
                     endpoint,
                     maxBatchSize,
-                    eventDelay,
+                    eventDelay.timeUnit.toMillis(eventDelay.delay),
                     offlineMaxSize,
                     secretKey,
-                    revoltLogLevel)
+                    revoltLogLevel,
+                    firstRetryTime,
+                    maxRetryTime)
         }
     }
 }

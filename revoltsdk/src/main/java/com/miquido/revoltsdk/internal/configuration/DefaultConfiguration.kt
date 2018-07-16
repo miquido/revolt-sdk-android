@@ -14,5 +14,7 @@ internal class DefaultConfiguration {
         val EVENT_DELAY: EventDelay = EventDelay(5, TimeUnit.SECONDS)
         const val OFFLINE_MAX_SIZE: Int = 10_000
         val LOG_LEVEL = RevoltLogLevel.WARN
+        const val FIRST_RETRY_TIME = 5
+        const val MAX_RETRY_TIME = 600
     }
 }

@@ -5,18 +5,21 @@ import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 internal class RevoltApiBuilder(private val endpointUrl: String,
-                       private val appInstanceId: String,
-                       private val trackingId: String,
-                       private val secretKey: String) {
+                                private val appInstanceId: String,
+                                private val trackingId: String,
+                                private val secretKey: String) {
 
     fun getRevoltApi(): RevoltApi {
         val client = OkHttpClient.Builder()
+                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
                 .addInterceptor {
                     val request = it.request()
                             .newBuilder()

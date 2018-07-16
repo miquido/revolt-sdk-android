@@ -10,19 +10,23 @@ import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.model.RevoltModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.ResponseModel
+import kotlin.math.pow
+import kotlin.math.roundToLong
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class RevoltService(eventDelay: EventDelay,
+internal class RevoltService(private val eventDelay: Long,
                              private val batchSize: Int,
                              private val backendRepository: BackendRepository,
-                             private val databaseRepository: DatabaseRepository) {
+                             private val databaseRepository: DatabaseRepository,
+                             private val firstRetryTimeSeconds: Int,
+                             private val maxRetryTimeSeconds: Int) {
 
     private val handler: Handler
     private val sendingEventTask = Runnable(sendingEventTask())
-    private val delayMillis = eventDelay.timeUnit.toMillis(eventDelay.delay)
+    private var sendingAttempts: Int = 0
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
@@ -53,6 +57,7 @@ internal class RevoltService(eventDelay: EventDelay,
         createNextEventToSend()
     }
 
+
     private fun sendEvent() {
         RevoltLogger.d("Sending events to backend")
 
@@ -68,8 +73,19 @@ internal class RevoltService(eventDelay: EventDelay,
         }
         val response = backendRepository.addEvents(eventsToSend)
         response?.let {
-            if (it.responseStatus == ResponseModel.ResponseStatus.OK) {
-                databaseRepository.removeElements(it.eventsAccepted)
+            when {
+                it.responseStatus == ResponseModel.ResponseStatus.OK -> {
+                    clearRetryData()
+                    databaseRepository.removeElements(it.eventsAccepted)
+                }
+                it.responseStatus == ResponseModel.ResponseStatus.RETRY -> {
+                    retryEvent()
+                }
+                else -> {
+                    clearRetryData()
+                    databaseRepository.removeElements(it.eventsAccepted + 1)
+                }
+
             }
         }
 
@@ -79,6 +95,14 @@ internal class RevoltService(eventDelay: EventDelay,
         createNextEventToSend()
     }
 
+    private fun clearRetryData() {
+        sendingAttempts = 0
+    }
+
+    private fun retryEvent() {
+        RevoltLogger.d("Retrying sending event")
+        ++sendingAttempts
+    }
 
     private fun sendingEventTask(): () -> Unit = {
         sendEvent()
@@ -86,13 +110,26 @@ internal class RevoltService(eventDelay: EventDelay,
 
 
     private fun createNextEventToSend() {
-        getTimeToSendEvent()?.let {
+        val timeMillisToSendEvents = if (sendingAttempts > 0)
+            getTimeToRetrySendingEvent()
+        else
+            getTimeToSendEvent()
+
+        RevoltLogger.d("Sending next event in: $timeMillisToSendEvents")
+
+        timeMillisToSendEvents?.let {
             if (it > 0) {
                 postTaskWithDelay(sendingEventTask, it)
             } else {
                 postTask(sendingEventTask)
             }
         }
+    }
+
+    private fun getTimeToRetrySendingEvent(): Long? {
+        val timeToRetry = Math.min(2f.pow(sendingAttempts - 1) * firstRetryTimeSeconds, maxRetryTimeSeconds.toFloat()) * 1000L
+        RevoltLogger.d("Retrying in $timeToRetry")
+        return timeToRetry.roundToLong()
     }
 
     private fun getTimeToSendEvent(): Long? {
@@ -104,7 +141,8 @@ internal class RevoltService(eventDelay: EventDelay,
 
         val firstEventTime = firstEvent.getTimestamp()
 
-        val timeToSend = firstEventTime + delayMillis - System.currentTimeMillis()
+        val timeToSend = firstEventTime + eventDelay - System.currentTimeMillis()
+
         return if (timeToSend >= 0) timeToSend else 0
     }
 }

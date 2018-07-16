@@ -11,9 +11,12 @@ internal data class RevoltConfiguration(
         var trackingId: String,
         var endpoint: String,
         var maxBatchSize: Int,
-        var eventDelay: EventDelay,
+        var eventDelay: Long,
         var offlineMaxSize: Int,
         var secretKey: String,
-        var logLevel: RevoltLogLevel)
+        var logLevel: RevoltLogLevel,
+        var firstRetryTime: Int,
+        var maxRetryTime: Int
+)
 
 data class EventDelay(val delay: Long, val timeUnit: TimeUnit)
