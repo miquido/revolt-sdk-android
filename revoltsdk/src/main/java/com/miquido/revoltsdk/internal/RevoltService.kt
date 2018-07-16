@@ -21,7 +21,7 @@ internal class RevoltService(eventDelay: EventDelay,
                              private val databaseRepository: DatabaseRepository) {
 
     private val handler: Handler
-    private val sendingEventTask = SendingEventTask()
+    private val sendingEventTask = Runnable(sendingEventTask())
     private val delayMillis = eventDelay.timeUnit.toMillis(eventDelay.delay)
 
     init {
@@ -53,34 +53,35 @@ internal class RevoltService(eventDelay: EventDelay,
         createNextEventToSend()
     }
 
+    private fun sendEvent() {
+        RevoltLogger.d("Sending events to backend")
 
-    inner class SendingEventTask : Runnable {
-        override fun run() {
-            RevoltLogger.d("Sending events to backend")
+        val millisToSend = getTimeToSendEvent() ?: return
 
-            val millisToSend = getTimeToSendEvent() ?: return
+        val eventsToSend = databaseRepository.getFirstEvents(batchSize)
 
-            val eventsToSend = databaseRepository.getFirstEvents(batchSize)
+        RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
 
-            RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
-
-            if (millisToSend > 0) {
-                postTaskWithDelay(sendingEventTask, millisToSend)
-                return
+        if (millisToSend > 0) {
+            postTaskWithDelay(sendingEventTask, millisToSend)
+            return
+        }
+        val response = backendRepository.addEvents(eventsToSend)
+        response?.let {
+            if (it.responseStatus == ResponseModel.ResponseStatus.OK) {
+                databaseRepository.removeElements(it.eventsAccepted)
             }
-            val response = backendRepository.addEvents(eventsToSend)
-            response?.let {
-                if (it.responseStatus == ResponseModel.ResponseStatus.OK) {
-                    databaseRepository.removeElements(it.eventsAccepted)
-                }
-            }
-
-
-            removeTask(sendingEventTask)
-
-            createNextEventToSend()
         }
 
+
+        removeTask(sendingEventTask)
+
+        createNextEventToSend()
+    }
+
+
+    private fun sendingEventTask(): () -> Unit = {
+        sendEvent()
     }
 
 
