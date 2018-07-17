@@ -11,7 +11,7 @@ import java.io.IOException
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class BackendRepository(private var revoltApi: RevoltApi) {
+internal class BackendRepository(private val revoltApi: RevoltApi) {
 
     private var retryCounter = 0
 
