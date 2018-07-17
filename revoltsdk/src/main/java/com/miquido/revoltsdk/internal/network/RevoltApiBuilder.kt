@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 internal class RevoltApiBuilder(private val endpointUrl: String,
-                                private val appInstanceId: String,
-                                private val trackingId: String,
-                                private val secretKey: String) {
+                       private val appInstanceId: String,
+                       private val trackingId: String,
+                       private val secretKey: String) {
 
     fun getRevoltApi(): RevoltApi {
         val client = OkHttpClient.Builder()
-                .readTimeout(60, TimeUnit.SECONDS)
-                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
                 .addInterceptor {
                     val request = it.request()
                             .newBuilder()

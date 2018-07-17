@@ -2,30 +2,50 @@ package com.miquido.revoltsdk.internal.network
 
 import com.google.gson.Gson
 import com.miquido.revoltsdk.internal.RevoltApi
-import com.miquido.revoltsdk.internal.model.RevoltModel
+import com.miquido.revoltsdk.internal.model.EventModel
+import java.io.IOException
 
 /** Created by MiQUiDO on 09.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class BackendRepository(private var revoltApi: RevoltApi) {
-
-    fun addEvents(events: ArrayList<RevoltModel>): ResponseModel? {
-        val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
-        val response = revoltApi.send(array).execute()
-        val responseModel = response.body()
-        when {
-            responseModel?.eventError?.errorCode == STATUS_CODE_WRONG_EVENT -> responseModel.responseStatus = ResponseModel.ResponseStatus.RETRY
-            response.code() == STATUS_CODE_OK -> responseModel?.responseStatus = ResponseModel.ResponseStatus.OK
-            else -> responseModel?.responseStatus = ResponseModel.ResponseStatus.ERROR
-        }
-
-        return response.body()
-    }
+internal class BackendRepository(private val revoltApi: RevoltApi) {
 
     companion object {
-        const val STATUS_CODE_OK = 200
         const val STATUS_CODE_SERVER_ERROR = 500
-        const val STATUS_CODE_WRONG_EVENT = 400
     }
+
+    fun sendEvents(events: ArrayList<EventModel>): SendEventsResult {
+        val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
+        return try {
+            val response = revoltApi.send(array).execute()
+            when {
+                response.isSuccessful -> {
+                    val responseModel = response.body()
+                    when {
+                        responseModel != null -> successfulResponse(responseModel)
+                        else -> SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+                    }
+                }
+                response.code() in 400..499 -> SendEventsResult(SendEventsResult.Status.REQUEST_ERROR)
+                else -> SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+            }
+        } catch (exception: IOException) {
+            SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+        }
+    }
+
+    private fun successfulResponse(sendEventResponse: SendEventResponse): SendEventsResult {
+        val eventError = sendEventResponse.eventError
+        val status = if (eventError != null) {
+            when (eventError.errorCode) {
+                STATUS_CODE_SERVER_ERROR -> SendEventsResult.Status.SERVER_EVENT_ERROR
+                else -> SendEventsResult.Status.REQUEST_EVENT_ERROR
+            }
+        } else {
+            SendEventsResult.Status.OK
+        }
+        return SendEventsResult(status, sendEventResponse.eventsAccepted)
+    }
+
 }
