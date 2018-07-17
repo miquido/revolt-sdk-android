@@ -17,7 +17,8 @@ internal class BackendRepository(private val revoltApi: RevoltApi) {
 
     companion object {
         const val MAX_RETRY_400_ERROR_NUMBER = 100
-        const val STATUS_CODE_RETRY = 500
+        const val STATUS_CODE_REQUEST_ERROR = 400
+        const val STATUS_CODE_SERVER_ERROR = 500
     }
 
     fun addEvents(events: ArrayList<EventRequestModel>): RevoltResponse {
@@ -29,30 +30,32 @@ internal class BackendRepository(private val revoltApi: RevoltApi) {
                     val responseModel = response.body()
                     when {
                         responseModel != null -> successfulResponse(responseModel)
-                        else -> RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.RETRYABLE_GLOBAL)
+                        else -> RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.SERVER_ERROR)
                     }
                 }
-                else -> RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.RETRYABLE_GLOBAL)
+                response.code() in STATUS_CODE_REQUEST_ERROR..(STATUS_CODE_SERVER_ERROR - 1) -> RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.REQUEST_ERROR)
+                else -> RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.SERVER_ERROR)
             }
         } catch (exception: IOException) {
-            RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.RETRYABLE_GLOBAL)
+            RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.SERVER_ERROR)
         }
     }
 
     private fun successfulResponse(eventResponseModel: EventResponseModel): RevoltResponse {
         val eventError = eventResponseModel.eventError
         return if (eventError != null) {
-            return if (eventError.errorCode == STATUS_CODE_RETRY) {
-                RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.PERMANENT_EVENT)
+            return if (eventError.errorCode == STATUS_CODE_SERVER_ERROR) {
+                RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.SERVER_EVENT_ERROR)
             } else {
                 ++retryCounter
                 if (retryCounter >= MAX_RETRY_400_ERROR_NUMBER) {
-                    RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.RETRYABLE_EVENT)
+                    RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.REQUEST_ERROR)
                 } else {
-                    RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.PERMANENT_EVENT)
+                    RevoltResponse(responseStatus = RevoltResponse.ResponseStatus.REQUEST_EVENT_ERROR)
                 }
             }
         } else {
+            retryCounter = 0
             RevoltResponse(eventResponseModel, RevoltResponse.ResponseStatus.OK)
         }
     }

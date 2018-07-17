@@ -6,6 +6,6 @@ package com.miquido.revoltsdk.internal.model
  */
 internal data class RevoltResponse(val eventResponseModel: EventResponseModel? = null, val responseStatus: ResponseStatus) {
     enum class ResponseStatus {
-        RETRYABLE_GLOBAL, RETRYABLE_EVENT, PERMANENT_EVENT, OK, ERROR
+        SERVER_ERROR, SERVER_EVENT_ERROR, REQUEST_ERROR, REQUEST_EVENT_ERROR, OK
     }
 }
