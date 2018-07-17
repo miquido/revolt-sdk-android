@@ -7,9 +7,9 @@ import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.log.RevoltLogger
-import com.miquido.revoltsdk.internal.model.EventRequestModel
+import com.miquido.revoltsdk.internal.model.EventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
-import com.miquido.revoltsdk.internal.model.RevoltResponse
+import com.miquido.revoltsdk.internal.network.SendEventsResult
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
@@ -31,7 +31,7 @@ internal class RevoltService(eventDelay: EventDelay,
     }
 
     fun addEvent(event: Event) {
-        postTask(saveEventInDatabaseTask(EventRequestModel(event)))
+        postTask(saveEventInDatabaseTask(EventModel(event)))
     }
 
     private fun postTask(task: () -> Unit) {
@@ -46,10 +46,10 @@ internal class RevoltService(eventDelay: EventDelay,
         handler.postDelayed(task, millis)
     }
 
-    private fun saveEventInDatabaseTask(eventRequestModel: EventRequestModel): () -> Unit = {
+    private fun saveEventInDatabaseTask(eventModel: EventModel): () -> Unit = {
         RevoltLogger.d("Adding events to database")
 
-        databaseRepository.addEvent(eventRequestModel)
+        databaseRepository.addEvent(eventModel)
         createNextSendingEventTask()
     }
 
@@ -59,6 +59,7 @@ internal class RevoltService(eventDelay: EventDelay,
         val millisToSend = getTimeToSendEvent() ?: return
 
         if (millisToSend > 0) {
+            removeTask(sendEventTask)
             postTaskWithDelay(sendEventTask, millisToSend)
             return
         }
@@ -66,11 +67,10 @@ internal class RevoltService(eventDelay: EventDelay,
         val eventsToSend = databaseRepository.getFirstEvents(batchSize)
         RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
 
-        val response = backendRepository.addEvents(eventsToSend)
-        if (response.responseStatus == RevoltResponse.ResponseStatus.OK) {
-            databaseRepository.removeEvents(response.eventResponseModel!!.eventsAccepted)
+        val response = backendRepository.sendEvents(eventsToSend)
+        if (response.responseStatus == SendEventsResult.Status.OK) {
+            databaseRepository.removeEvents(response.eventsAccepted)
         }
-
 
         createNextSendingEventTask()
     }

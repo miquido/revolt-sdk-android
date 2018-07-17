@@ -1,6 +1,6 @@
 package com.miquido.revoltsdk.internal.database
 
-import com.miquido.revoltsdk.internal.model.EventRequestModel
+import com.miquido.revoltsdk.internal.model.EventModel
 import java.util.*
 
 /** Created by MiQUiDO on 09.07.2018.
@@ -8,13 +8,13 @@ import java.util.*
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 internal class DatabaseRepository {
-    private val list: MutableList<EventRequestModel> = ArrayList()
+    private val list: MutableList<EventModel> = ArrayList()
 
     fun getEventsNumber(): Int {
         return list.size
     }
 
-    fun getFirstEvents(number: Int): ArrayList<EventRequestModel> {
+    fun getFirstEvents(number: Int): ArrayList<EventModel> {
         return ArrayList(list.take(number))
     }
 
@@ -22,11 +22,11 @@ internal class DatabaseRepository {
         list.subList(0, number).clear()
     }
 
-    fun getFirstEvent(): EventRequestModel? {
+    fun getFirstEvent(): EventModel? {
         return if (list.isEmpty()) null else list[0]
     }
 
-    fun addEvent(event: EventRequestModel) {
+    fun addEvent(event: EventModel) {
         list.add(event)
     }
 }

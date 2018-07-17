@@ -1,7 +1,7 @@
 package com.miquido.revoltsdk.internal
 
 import com.google.gson.JsonArray
-import com.miquido.revoltsdk.internal.model.EventResponseModel
+import com.miquido.revoltsdk.internal.network.SendEventResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -13,5 +13,5 @@ import retrofit2.http.POST
 internal interface RevoltApi {
 
     @POST("events")
-    fun send(@Body event: JsonArray): Call<EventResponseModel>
+    fun send(@Body event: JsonArray): Call<SendEventResponse>
 }
