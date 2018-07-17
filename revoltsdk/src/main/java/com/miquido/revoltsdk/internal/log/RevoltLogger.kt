@@ -19,62 +19,61 @@ internal object RevoltLogger {
 
     fun e(message: String) {
         if (shouldShowLog(ERROR)) {
-            Log.e(TAG, message)
+            Log.e(TAG, "$message, currentThread: ${Thread.currentThread().name}")
         }
     }
 
     fun e(message: String, throwable: Throwable) {
         if (shouldShowLog(ERROR)) {
-            Log.e(TAG, message, throwable)
+            Log.e(TAG, "$message, currentThread: ${Thread.currentThread().name}", throwable)
         }
     }
 
     fun w(message: String) {
         if (shouldShowLog(WARN)) {
-            Log.w(TAG, message)
+            Log.w(TAG, "$message, currentThread: ${Thread.currentThread().name}")
         }
     }
 
     fun w(message: String, throwable: Throwable) {
         if (shouldShowLog(WARN)) {
-            Log.w(TAG, message, throwable)
+            Log.w(TAG, "$message, currentThread: ${Thread.currentThread().name}", throwable)
         }
     }
 
     fun i(message: String) {
         if (shouldShowLog(INFO)) {
-            Log.i(TAG, message)
+            Log.i(TAG, "$message, currentThread: ${Thread.currentThread().name}")
         }
     }
 
     fun i(message: String, throwable: Throwable) {
         if (shouldShowLog(INFO)) {
-            Log.i(TAG, message, throwable)
+            Log.i(TAG, "$message, currentThread: ${Thread.currentThread().name}", throwable)
         }
     }
 
     fun d(message: String) {
         if (shouldShowLog(DEBUG)) {
-            //TODO remove displaying thread info
-            Log.d(TAG, "$message mainThread: ${Looper.getMainLooper().isCurrentThread}")
+            Log.d(TAG, "$message, currentThread: ${Thread.currentThread().name}")
         }
     }
 
     fun d(message: String, throwable: Throwable) {
         if (shouldShowLog(DEBUG)) {
-            Log.d(TAG, message, throwable)
+            Log.d(TAG, "$message, currentThread: ${Thread.currentThread().name}", throwable)
         }
     }
 
     fun v(message: String) {
         if (shouldShowLog(VERBOSE)) {
-            Log.v(TAG, message)
+            Log.v(TAG, "$message, currentThread: ${Thread.currentThread().name}")
         }
     }
 
     fun v(message: String, throwable: Throwable) {
         if (shouldShowLog(VERBOSE)) {
-            Log.v(TAG, message, throwable)
+            Log.v(TAG, "$message, currentThread: ${Thread.currentThread().name}", throwable)
         }
     }
 

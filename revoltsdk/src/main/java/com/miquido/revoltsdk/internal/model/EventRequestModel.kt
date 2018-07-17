@@ -7,7 +7,7 @@ import com.miquido.revoltsdk.Event
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal data class RevoltModel(private val event: Event) {
+internal data class EventRequestModel(private val event: Event) {
 
     private val metaDataModel: MetaDataModel = MetaDataModel(event.getType())
 

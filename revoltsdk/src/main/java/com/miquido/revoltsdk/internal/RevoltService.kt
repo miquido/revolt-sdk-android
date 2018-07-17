@@ -7,9 +7,9 @@ import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.log.RevoltLogger
-import com.miquido.revoltsdk.internal.model.RevoltModel
+import com.miquido.revoltsdk.internal.model.EventRequestModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
-import com.miquido.revoltsdk.internal.network.ResponseModel
+import com.miquido.revoltsdk.internal.model.RevoltResponse
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
@@ -21,7 +21,7 @@ internal class RevoltService(eventDelay: EventDelay,
                              private val databaseRepository: DatabaseRepository) {
 
     private val handler: Handler
-    private val sendingEventTask = Runnable(sendingEventTask())
+    private val sendEventTask = ::sendEvent
     private val delayMillis = eventDelay.timeUnit.toMillis(eventDelay.delay)
 
     init {
@@ -31,26 +31,26 @@ internal class RevoltService(eventDelay: EventDelay,
     }
 
     fun addEvent(event: Event) {
-        postTask(Runnable(saveEventInDatabaseTask(RevoltModel(event))))
+        postTask(saveEventInDatabaseTask(EventRequestModel(event)))
     }
 
-    private fun postTask(task: Runnable) {
+    private fun postTask(task: () -> Unit) {
         handler.post(task)
     }
 
-    private fun removeTask(task: Runnable) {
+    private fun removeTask(task: () -> Unit) {
         handler.removeCallbacks(task)
     }
 
-    private fun postTaskWithDelay(task: Runnable, millis: Long) {
+    private fun postTaskWithDelay(task: () -> Unit, millis: Long) {
         handler.postDelayed(task, millis)
     }
 
-    private fun saveEventInDatabaseTask(revoltModel: RevoltModel): () -> Unit = {
+    private fun saveEventInDatabaseTask(eventRequestModel: EventRequestModel): () -> Unit = {
         RevoltLogger.d("Adding events to database")
 
-        databaseRepository.addEvent(revoltModel)
-        createNextEventToSend()
+        databaseRepository.addEvent(eventRequestModel)
+        createNextSendingEventTask()
     }
 
     private fun sendEvent() {
@@ -58,39 +58,32 @@ internal class RevoltService(eventDelay: EventDelay,
 
         val millisToSend = getTimeToSendEvent() ?: return
 
-        val eventsToSend = databaseRepository.getFirstEvents(batchSize)
-
-        RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
-
         if (millisToSend > 0) {
-            postTaskWithDelay(sendingEventTask, millisToSend)
+            postTaskWithDelay(sendEventTask, millisToSend)
             return
         }
+
+        val eventsToSend = databaseRepository.getFirstEvents(batchSize)
+        RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
+
         val response = backendRepository.addEvents(eventsToSend)
-        response?.let {
-            if (it.responseStatus == ResponseModel.ResponseStatus.OK) {
-                databaseRepository.removeElements(it.eventsAccepted)
-            }
+        if (response.responseStatus == RevoltResponse.ResponseStatus.OK) {
+            databaseRepository.removeEvents(response.eventResponseModel!!.eventsAccepted)
         }
 
 
-        removeTask(sendingEventTask)
-
-        createNextEventToSend()
+        createNextSendingEventTask()
     }
 
 
-    private fun sendingEventTask(): () -> Unit = {
-        sendEvent()
-    }
+    private fun createNextSendingEventTask() {
+        removeTask(sendEventTask)
 
-
-    private fun createNextEventToSend() {
         getTimeToSendEvent()?.let {
             if (it > 0) {
-                postTaskWithDelay(sendingEventTask, it)
+                postTaskWithDelay(sendEventTask, it)
             } else {
-                postTask(sendingEventTask)
+                postTask(sendEventTask)
             }
         }
     }
