@@ -5,6 +5,7 @@ import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
@@ -17,6 +18,8 @@ internal class RevoltApiBuilder(private val endpointUrl: String,
 
     fun getRevoltApi(): RevoltApi {
         val client = OkHttpClient.Builder()
+                .readTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
                 .addInterceptor {
                     val request = it.request()
                             .newBuilder()
@@ -27,7 +30,7 @@ internal class RevoltApiBuilder(private val endpointUrl: String,
 
 
         val retrofit = Retrofit.Builder()
-                .baseUrl("$endpointUrl/api/v1/$trackingId/$appInstanceId/")
+                .baseUrl("$endpointUrl/$trackingId/$appInstanceId/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client.build())
                 .build()

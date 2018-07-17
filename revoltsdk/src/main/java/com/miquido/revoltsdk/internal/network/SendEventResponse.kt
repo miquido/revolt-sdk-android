@@ -4,8 +4,9 @@ package com.miquido.revoltsdk.internal.network
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal data class ResponseModel(var eventsAccepted: Int,
-                                  val eventError: EventError?) {
+internal data class SendEventResponse(val eventsAccepted: Int,
+                                      val eventError: EventError?) {
+
 
     class EventError {
         var eventOffset: Int? = null

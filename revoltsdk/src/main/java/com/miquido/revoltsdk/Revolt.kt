@@ -2,18 +2,19 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
-import com.miquido.revoltsdk.internal.RevoltRepository
+import com.miquido.revoltsdk.internal.RevoltService
 import com.miquido.revoltsdk.internal.ScreenSizeProvider
 import com.miquido.revoltsdk.internal.AppInstanceDataEventGenerator
 import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
+import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
-import com.miquido.revoltsdk.internal.network.RevoltRequestModel
+import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
  * <p>
@@ -23,7 +24,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                                  context: Context) {
 
     private val appInstanceDataEventGenerator: AppInstanceDataEventGenerator
-    private val revoltRepository: RevoltRepository
+    private val revoltService: RevoltService
     private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
     companion object {
@@ -40,7 +41,10 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository()
-        revoltRepository = RevoltRepository(backendRepository, databaseRepository)
+        revoltService = RevoltService(revoltConfiguration.eventDelay,
+                revoltConfiguration.maxBatchSize,
+                backendRepository,
+                databaseRepository)
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -53,13 +57,11 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
      * @param event Event to send.
      */
     fun sendEvent(event: Event) {
-        val revoltRequestModel = RevoltRequestModel(event)
-        revoltRepository.addEvent(revoltRequestModel)
+        revoltService.addEvent(event)
     }
 
     private fun startSession() {
-        val revoltRequestModel = RevoltRequestModel(appInstanceDataEventGenerator.generateEvent())
-        revoltRepository.addEvent(revoltRequestModel)
+        revoltService.addEvent(appInstanceDataEventGenerator.generateEvent())
     }
 
     class BuilderContext {
@@ -82,17 +84,18 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
 
-    class Builder(private var context: Context,
-                  private var trackingId: String,
-                  private var secretKey: String) {
+    class Builder(private val context: Context,
+                  private val trackingId: String,
+                  private val secretKey: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
-        private var eventDelay: Int = DefaultConfiguration.EVENT_DELAY
+        private var eventDelay: EventDelay = DefaultConfiguration.EVENT_DELAY
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
         private var endpoint: String = DefaultConfiguration.URL
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
 
-        fun logLevel(revoltLogLevel: RevoltLogLevel) {
+        fun logLevel(revoltLogLevel: RevoltLogLevel): Revolt.Builder {
             this.revoltLogLevel = revoltLogLevel
+            return this
         }
 
         fun maxBatchSize(size: Int): Revolt.Builder {
@@ -100,8 +103,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return this
         }
 
-        fun eventDelay(delay: Int): Revolt.Builder {
-            this.eventDelay = delay
+        fun eventDelay(delay: Long, timeUnit: TimeUnit): Revolt.Builder {
+            this.eventDelay = EventDelay(delay, timeUnit)
             return this
         }
 

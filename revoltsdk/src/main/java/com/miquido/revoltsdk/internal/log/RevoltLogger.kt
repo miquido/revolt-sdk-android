@@ -1,5 +1,6 @@
 package com.miquido.revoltsdk.internal.log
 
+import android.os.Looper
 import android.util.Log
 import com.miquido.revoltsdk.RevoltLogLevel
 import com.miquido.revoltsdk.RevoltLogLevel.*
@@ -18,65 +19,69 @@ internal object RevoltLogger {
 
     fun e(message: String) {
         if (shouldShowLog(ERROR)) {
-            Log.e(TAG, message)
+            Log.e(TAG, formatLog(message))
         }
     }
 
     fun e(message: String, throwable: Throwable) {
         if (shouldShowLog(ERROR)) {
-            Log.e(TAG, message, throwable)
+            Log.e(TAG, formatLog(message), throwable)
         }
     }
 
     fun w(message: String) {
         if (shouldShowLog(WARN)) {
-            Log.w(TAG, message)
+            Log.w(TAG, formatLog(message))
         }
     }
 
     fun w(message: String, throwable: Throwable) {
         if (shouldShowLog(WARN)) {
-            Log.w(TAG, message, throwable)
+            Log.w(TAG, formatLog(message), throwable)
         }
     }
 
     fun i(message: String) {
         if (shouldShowLog(INFO)) {
-            Log.i(TAG, message)
+            Log.i(TAG, formatLog(message))
         }
     }
 
     fun i(message: String, throwable: Throwable) {
         if (shouldShowLog(INFO)) {
-            Log.i(TAG, message, throwable)
+            Log.i(TAG, formatLog(message), throwable)
         }
     }
 
     fun d(message: String) {
         if (shouldShowLog(DEBUG)) {
-            Log.d(TAG, message)
+            Log.d(TAG, formatLog(message))
         }
     }
 
     fun d(message: String, throwable: Throwable) {
         if (shouldShowLog(DEBUG)) {
-            Log.d(TAG, message, throwable)
+            Log.d(TAG, formatLog(message), throwable)
         }
     }
 
     fun v(message: String) {
         if (shouldShowLog(VERBOSE)) {
-            Log.v(TAG, message)
+            Log.v(TAG, formatLog(message))
         }
     }
 
     fun v(message: String, throwable: Throwable) {
         if (shouldShowLog(VERBOSE)) {
-            Log.v(TAG, message, throwable)
+            Log.v(TAG, formatLog(message), throwable)
         }
     }
 
     private fun shouldShowLog(revoltLogLevel: RevoltLogLevel): Boolean {
         return logLevel >= revoltLogLevel
     }
+
+    private fun formatLog(message: String) = "[${threadName()}] $message"
+
+    private fun threadName() = Thread.currentThread().name.padEnd(12).substring(0, 12)
 }

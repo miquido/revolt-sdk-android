@@ -1,28 +1,51 @@
 package com.miquido.revoltsdk.internal.network
 
-import com.miquido.revoltsdk.internal.EventsRepository
+import com.google.gson.Gson
 import com.miquido.revoltsdk.internal.RevoltApi
-import com.miquido.revoltsdk.internal.log.RevoltLogger
-import com.miquido.revoltsdk.internal.packWithArray
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.miquido.revoltsdk.internal.model.EventModel
+import java.io.IOException
 
 /** Created by MiQUiDO on 09.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class BackendRepository(private val revoltApi: RevoltApi) : EventsRepository {
+internal class BackendRepository(private val revoltApi: RevoltApi) {
 
-    override fun addEvent(event: RevoltRequestModel) {
-        revoltApi.send(event.createJson().packWithArray()).enqueue(object : Callback<ResponseModel> {
-            override fun onFailure(call: Call<ResponseModel>?, t: Throwable) {
-                RevoltLogger.e(t.localizedMessage)
-            }
-
-            override fun onResponse(call: Call<ResponseModel>?, response: Response<ResponseModel>?) {
-
-            }
-        })
+    companion object {
+        const val STATUS_CODE_SERVER_ERROR = 500
     }
+
+    fun sendEvents(events: ArrayList<EventModel>): SendEventsResult {
+        val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
+        return try {
+            val response = revoltApi.send(array).execute()
+            when {
+                response.isSuccessful -> {
+                    val responseModel = response.body()
+                    when {
+                        responseModel != null -> successfulResponse(responseModel)
+                        else -> SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+                    }
+                }
+                response.code() in 400..499 -> SendEventsResult(SendEventsResult.Status.REQUEST_ERROR)
+                else -> SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+            }
+        } catch (exception: IOException) {
+            SendEventsResult(SendEventsResult.Status.SERVER_ERROR)
+        }
+    }
+
+    private fun successfulResponse(sendEventResponse: SendEventResponse): SendEventsResult {
+        val eventError = sendEventResponse.eventError
+        val status = if (eventError != null) {
+            when (eventError.errorCode) {
+                STATUS_CODE_SERVER_ERROR -> SendEventsResult.Status.SERVER_EVENT_ERROR
+                else -> SendEventsResult.Status.REQUEST_EVENT_ERROR
+            }
+        } else {
+            SendEventsResult.Status.OK
+        }
+        return SendEventsResult(status, sendEventResponse.eventsAccepted)
+    }
+
 }
