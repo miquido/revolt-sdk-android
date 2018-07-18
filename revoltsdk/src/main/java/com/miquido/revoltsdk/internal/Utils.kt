@@ -14,10 +14,6 @@ internal fun hasPermission(context: Context, permission: String): Boolean {
     return context.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED
 }
 
-internal fun JsonObject.packWithArray(): JsonArray {
-    val jsonArray = JsonArray()
-    jsonArray.add(this)
-    return jsonArray
-}
-
 internal fun ByteArray.toHex() = this.joinToString(separator = "") { it.toInt().and(0xff).toString(16).padStart(2, '0') }
+
+internal fun Int.secondsToMillis() = this * 1000L
