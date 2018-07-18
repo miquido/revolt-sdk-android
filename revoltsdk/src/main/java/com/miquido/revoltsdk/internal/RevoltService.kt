@@ -5,30 +5,27 @@ import android.os.HandlerThread
 import android.os.Process
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.Event
-import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.model.EventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
-import com.miquido.revoltsdk.internal.network.ResponseModel
-import kotlin.math.pow
-import kotlin.math.roundToLong
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class RevoltService(private val eventDelay: Long,
+internal class RevoltService(private val eventDelayMillis: Long,
                              private val batchSize: Int,
                              private val backendRepository: BackendRepository,
                              private val databaseRepository: DatabaseRepository,
-                             private val firstRetryTimeSeconds: Int,
-                             private val maxRetryTimeSeconds: Int) {
+                             private val firstSendingRetryTimeSeconds: Int,
+                             private val maxSendingRetryTimeSeconds: Int) {
 
     private val handler: Handler
     private val sendEventTask = ::sendEvent
-    private val delayMillis = eventDelay.timeUnit.toMillis(eventDelay.delay)
-    private var sendingAttempts: Int = 0
+    private var sendingAttempts = 0
+    private var lastAttemptTime = 0L
+    private var requestEventErrorRetryCounter = 0
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
@@ -36,21 +33,13 @@ internal class RevoltService(private val eventDelay: Long,
         handler = Handler(thread.looper)
     }
 
-    fun addEvent(event: Event) {
-        postTask(saveEventInDatabaseTask(EventModel(event)))
-    }
+    fun addEvent(event: Event) = postTask(saveEventInDatabaseTask(EventModel(event)))
 
-    private fun postTask(task: () -> Unit) {
-        handler.post(task)
-    }
+    private fun postTask(task: () -> Unit) = handler.post(task)
 
-    private fun removeTask(task: () -> Unit) {
-        handler.removeCallbacks(task)
-    }
+    private fun removeTask(task: () -> Unit) = handler.removeCallbacks(task)
 
-    private fun postTaskWithDelay(task: () -> Unit, millis: Long) {
-        handler.postDelayed(task, millis)
-    }
+    private fun postTaskWithDelay(task: () -> Unit, millis: Long) = handler.postDelayed(task, millis)
 
     private fun saveEventInDatabaseTask(eventModel: EventModel): () -> Unit = {
         RevoltLogger.d("Adding events to database")
@@ -64,66 +53,70 @@ internal class RevoltService(private val eventDelay: Long,
 
         val millisToSend = getTimeToSendEvent() ?: return
 
-
-                if (millisToSend > 0) {
-                    removeTask(sendEventTask)
-                    postTaskWithDelay(sendEventTask, millisToSend)
-                    return
-                }
+        if (millisToSend > 0) {
+            removeTask(sendEventTask)
+            postTaskWithDelay(sendEventTask, millisToSend)
+            return
+        }
 
         val eventsToSend = databaseRepository.getFirstEvents(batchSize)
         RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
 
-
-        val response = backendRepository.addEvents(eventsToSend)
-        response?.let {
-            if (it.responseStatus == ResponseModel.ResponseStatus.OK) {
-                databaseRepository.removeElements(it.eventsAccepted)
-            }
-            it.responseStatus == ResponseModel.ResponseStatus.OK -> {
-                                clearRetryData()
-                                databaseRepository.removeElements(it.eventsAccepted)
-                            }
-                            it.responseStatus == ResponseModel.ResponseStatus.RETRY -> {
-                                retryEvent()
-                            }
-                            else -> {
-                                clearRetryData()
-                                databaseRepository.removeElements(it.eventsAccepted + 1)
-                            }
-        }
-
-
+        val response = backendRepository.sendEvents(eventsToSend)
+        handleResponse(response)
 
         createNextSendingEventTask()
     }
 
-
-    private fun sendingEventTask(): () -> Unit = {
-        sendEvent()
+    private fun handleResponse(result: SendEventsResult) {
+        RevoltLogger.d("Response status: ${result.responseStatus}")
+        when (result.responseStatus) {
+            SendEventsResult.Status.OK -> {
+                databaseRepository.removeEvents(result.eventsAccepted)
+                clearRetryData()
+            }
+            SendEventsResult.Status.SERVER_ERROR -> retryEvent()
+            SendEventsResult.Status.SERVER_EVENT_ERROR -> {
+                databaseRepository.removeEvents(result.eventsAccepted)
+                clearRetryData()
+            }
+            SendEventsResult.Status.REQUEST_ERROR -> retryEvent()
+            SendEventsResult.Status.REQUEST_EVENT_ERROR -> {
+                databaseRepository.removeEvents(result.eventsAccepted + 1)
+                retryEventError()
+            }
+        }
     }
 
     private fun clearRetryData() {
-            sendingAttempts = 0
-        }
+        sendingAttempts = 0
+        requestEventErrorRetryCounter = 0
+        lastAttemptTime = 0
+    }
 
-        private fun retryEvent() {
-            RevoltLogger.d("Retrying sending event")
-            ++sendingAttempts
-        }
+    private fun retryEventError() {
+        ++requestEventErrorRetryCounter
+        lastAttemptTime = System.currentTimeMillis()
+    }
 
+    private fun retryEvent() {
+        ++sendingAttempts
+        RevoltLogger.d("Retrying sending event - attempts number: $sendingAttempts")
+        lastAttemptTime = System.currentTimeMillis()
+    }
 
     private fun createNextSendingEventTask() {
         removeTask(sendEventTask)
 
-        val timeMillisToSendEvents = if (sendingAttempts > 0)
-                    getTimeToRetrySendingEvent()
-                else
-                    getTimeToSendEvent()
+        val timeMillisToSendEvents = when {
+            sendingAttempts > 0 -> getTimeToRetrySendingEvent(sendingAttempts)
+            requestEventErrorRetryCounter > 100 -> getTimeToRetrySendingEvent(100 - requestEventErrorRetryCounter)
+            else -> getTimeToSendEvent()
+        }
 
-                RevoltLogger.d("Sending next event in: $timeMillisToSendEvents")
+        RevoltLogger.d("Sending next event in: $timeMillisToSendEvents")
 
-                timeMillisToSendEvents?.let {
+        timeMillisToSendEvents?.let {
             if (it > 0) {
                 postTaskWithDelay(sendEventTask, it)
             } else {
@@ -132,11 +125,17 @@ internal class RevoltService(private val eventDelay: Long,
         }
     }
 
-    private fun getTimeToRetrySendingEvent(): Long? {
-         val timeToRetry = Math.min(2f.pow(sendingAttempts - 1) * firstRetryTimeSeconds, maxRetryTimeSeconds.toFloat()) * 1000L
-         RevoltLogger.d("Retrying in $timeToRetry")
-         return timeToRetry.roundToLong()
-     }
+    private fun powOf2(n: Int) = 1 shl n
+
+    private fun getTimeToRetrySendingEvent(attempts: Int): Long {
+        if (attempts > 10) {
+            return maxSendingRetryTimeSeconds.secondsToMillis()
+        }
+        val intervalTimeMillis = Math.min(powOf2(attempts - 1) * firstSendingRetryTimeSeconds, maxSendingRetryTimeSeconds).secondsToMillis()
+        val retryTime = lastAttemptTime + intervalTimeMillis - System.currentTimeMillis()
+        RevoltLogger.d("Retrying in $retryTime")
+        return Math.max(retryTime, 0)
+    }
 
     private fun getTimeToSendEvent(): Long? {
         if (databaseRepository.getEventsNumber() >= batchSize) {
@@ -147,7 +146,7 @@ internal class RevoltService(private val eventDelay: Long,
 
         val firstEventTime = firstEvent.getTimestamp()
 
-        val timeToSend = firstEventTime + delayMillis - System.currentTimeMillis()
-        return if (timeToSend >= 0) timeToSend else 0
+        val timeToSend = firstEventTime + eventDelayMillis - System.currentTimeMillis()
+        return Math.max(timeToSend, 0)
     }
 }
