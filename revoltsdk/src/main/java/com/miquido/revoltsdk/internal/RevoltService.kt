@@ -109,8 +109,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
         removeTask(sendEventTask)
 
         val timeMillisToSendEvents = when {
-            sendingAttempts > 0 -> getTimeToRetrySendingEvent(sendingAttempts)
-            requestEventErrorRetryCounter > 100 -> getTimeToRetrySendingEvent(100 - requestEventErrorRetryCounter)
+            isRetryRequired() -> getTimeToRetrySendingEvent()
             else -> getTimeToSendEvent()
         }
 
@@ -125,17 +124,27 @@ internal class RevoltService(private val eventDelayMillis: Long,
         }
     }
 
-    private fun powOf2(n: Int) = 1 shl n
+    private fun isRetryRequired() = sendingAttempts > 0 || requestEventErrorRetryCounter > 100
 
-    private fun getTimeToRetrySendingEvent(attempts: Int): Long {
-        if (attempts > 10) {
-            return maxSendingRetryTimeSeconds.secondsToMillis()
+    private fun getTimeToRetrySendingEvent(): Long {
+        val intervalTimeMillis = when {
+            requestEventErrorRetryCounter > 100 -> getRetryInterval(100 - requestEventErrorRetryCounter)
+            else -> getRetryInterval(sendingAttempts)
         }
-        val intervalTimeMillis = Math.min(powOf2(attempts - 1) * firstSendingRetryTimeSeconds, maxSendingRetryTimeSeconds).secondsToMillis()
         val retryTime = lastAttemptTime + intervalTimeMillis - System.currentTimeMillis()
         RevoltLogger.d("Retrying in $retryTime")
         return Math.max(retryTime, 0)
     }
+
+    private fun getRetryInterval(attempts: Int) : Long {
+        if (attempts > 10) {
+            return maxSendingRetryTimeSeconds.secondsToMillis()
+        }
+        return Math.min(powOf2(attempts - 1) * firstSendingRetryTimeSeconds, maxSendingRetryTimeSeconds).secondsToMillis()
+    }
+
+    private fun powOf2(n: Int) = 1 shl n
+
 
     private fun getTimeToSendEvent(): Long? {
         if (databaseRepository.getEventsNumber() >= batchSize) {
@@ -150,3 +159,4 @@ internal class RevoltService(private val eventDelayMillis: Long,
         return Math.max(timeToSend, 0)
     }
 }
+
