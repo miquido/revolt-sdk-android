@@ -40,7 +40,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository()
-        revoltService = RevoltService(revoltConfiguration.eventDelay,
+        revoltService = RevoltService(revoltConfiguration.eventDelayMillis,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
                 databaseRepository,
@@ -89,12 +89,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                   private val trackingId: String,
                   private val secretKey: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
-        private var eventDelay = DefaultConfiguration.EVENT_DELAY
+        private var eventDelayMillis = DefaultConfiguration.EVENT_DELAY_MILLIS
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
         private var endpoint: String = DefaultConfiguration.URL
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
-        private var firstRetryTime = DefaultConfiguration.FIRST_RETRY_TIME
-        private var maxRetryTime = DefaultConfiguration.MAX_RETRY_TIME
+        private var firstRetryTimeSeconds = DefaultConfiguration.FIRST_RETRY_TIME_SECONDS
+        private var maxRetryTimeSeconds = DefaultConfiguration.MAX_RETRY_TIME_SECONDS
 
         fun logLevel(revoltLogLevel: RevoltLogLevel): Revolt.Builder {
             this.revoltLogLevel = revoltLogLevel
@@ -107,17 +107,17 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         }
 
         fun eventDelay(delay: Long, timeUnit: TimeUnit): Revolt.Builder {
-            this.eventDelay = timeUnit.toMillis(delay)
+            this.eventDelayMillis = timeUnit.toMillis(delay)
             return this
         }
 
         fun firstRetryIntervalSeconds(time: Int): Revolt.Builder {
-            this.firstRetryTime = time
+            this.firstRetryTimeSeconds = time
             return this
         }
 
         fun maxRetryIntervalSeconds(time: Int): Revolt.Builder {
-            this.maxRetryTime = time
+            this.maxRetryTimeSeconds = time
             return this
         }
 
@@ -143,12 +143,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return RevoltConfiguration(trackingId,
                     endpoint,
                     maxBatchSize,
-                    eventDelay,
+                    eventDelayMillis,
                     offlineMaxSize,
                     secretKey,
                     revoltLogLevel,
-                    firstRetryTime,
-                    maxRetryTime)
+                    firstRetryTimeSeconds,
+                    maxRetryTimeSeconds)
         }
     }
 }

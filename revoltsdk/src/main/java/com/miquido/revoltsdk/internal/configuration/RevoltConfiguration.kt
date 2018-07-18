@@ -11,7 +11,7 @@ internal data class RevoltConfiguration(
         var trackingId: String,
         var endpoint: String,
         var maxBatchSize: Int,
-        var eventDelay: Long,
+        var eventDelayMillis: Long,
         var offlineMaxSize: Int,
         var secretKey: String,
         var logLevel: RevoltLogLevel,
