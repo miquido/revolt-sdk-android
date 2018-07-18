@@ -15,8 +15,6 @@ internal data class RevoltConfiguration(
         var offlineMaxSize: Int,
         var secretKey: String,
         var logLevel: RevoltLogLevel,
-        var firstRetryTime: Int,
-        var maxRetryTime: Int
+        var firstRetryTimeSeconds: Int,
+        var maxRetryTimeSeconds: Int
 )
-
-data class EventDelay(val delay: Long, val timeUnit: TimeUnit)

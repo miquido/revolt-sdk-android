@@ -25,7 +25,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private val handler: Handler
     private val sendEventTask = ::sendEvent
     private var sendingAttempts = 0
-    private var lastAttemptTime = 0L
+    private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
 
     init {
@@ -96,18 +96,18 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private fun clearRetryData() {
         sendingAttempts = 0
         requestEventErrorRetryCounter = 0
-        lastAttemptTime = 0
+        lastAttemptTimeMillis = 0
     }
 
     private fun retryEventError() {
         ++requestEventErrorRetryCounter
-        lastAttemptTime = System.currentTimeMillis()
+        lastAttemptTimeMillis = System.currentTimeMillis()
     }
 
     private fun retryEvent() {
         ++sendingAttempts
         RevoltLogger.d("Retrying sending event - attempts number: $sendingAttempts")
-        lastAttemptTime = System.currentTimeMillis()
+        lastAttemptTimeMillis = System.currentTimeMillis()
     }
 
     private fun createNextSendingEventTask() {
@@ -137,7 +137,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
                 getRetryInterval(MAX_REQUEST_ERROR_RETRY_ATTEMPTS - requestEventErrorRetryCounter)
             else -> getRetryInterval(sendingAttempts)
         }
-        val retryTime = lastAttemptTime + intervalTimeMillis - System.currentTimeMillis()
+        val retryTime = lastAttemptTimeMillis + intervalTimeMillis - System.currentTimeMillis()
         RevoltLogger.d("Retrying in $retryTime")
         return Math.max(retryTime, 0)
     }
