@@ -2,8 +2,6 @@ package com.miquido.revoltsdk.internal
 
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
 
