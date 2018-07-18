@@ -7,7 +7,6 @@ import com.miquido.revoltsdk.internal.ScreenSizeProvider
 import com.miquido.revoltsdk.internal.AppInstanceDataEventGenerator
 import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
-import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
 import com.miquido.revoltsdk.internal.database.DatabaseBuilder
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
@@ -42,10 +41,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository(DatabaseBuilder(context).getEventsDao())
-        revoltService = RevoltService(revoltConfiguration.eventDelay,
+        revoltService = RevoltService(revoltConfiguration.eventDelayMillis,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
-                databaseRepository)
+                databaseRepository,
+                revoltConfiguration.firstRetryTimeSeconds,
+                revoltConfiguration.maxRetryTimeSeconds)
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -89,10 +90,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                   private val trackingId: String,
                   private val secretKey: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
-        private var eventDelay: EventDelay = DefaultConfiguration.EVENT_DELAY
+        private var eventDelayMillis = DefaultConfiguration.EVENT_DELAY_MILLIS
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
         private var endpoint: String = DefaultConfiguration.URL
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
+        private var firstRetryTimeSeconds = DefaultConfiguration.FIRST_RETRY_TIME_SECONDS
+        private var maxRetryTimeSeconds = DefaultConfiguration.MAX_RETRY_TIME_SECONDS
 
         fun logLevel(revoltLogLevel: RevoltLogLevel): Revolt.Builder {
             this.revoltLogLevel = revoltLogLevel
@@ -105,7 +108,17 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         }
 
         fun eventDelay(delay: Long, timeUnit: TimeUnit): Revolt.Builder {
-            this.eventDelay = EventDelay(delay, timeUnit)
+            this.eventDelayMillis = timeUnit.toMillis(delay)
+            return this
+        }
+
+        fun firstRetryIntervalSeconds(time: Int): Revolt.Builder {
+            this.firstRetryTimeSeconds = time
+            return this
+        }
+
+        fun maxRetryIntervalSeconds(time: Int): Revolt.Builder {
+            this.maxRetryTimeSeconds = time
             return this
         }
 
@@ -131,10 +144,12 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return RevoltConfiguration(trackingId,
                     endpoint,
                     maxBatchSize,
-                    eventDelay,
+                    eventDelayMillis,
                     offlineMaxSize,
                     secretKey,
-                    revoltLogLevel)
+                    revoltLogLevel,
+                    firstRetryTimeSeconds,
+                    maxRetryTimeSeconds)
         }
     }
 }
