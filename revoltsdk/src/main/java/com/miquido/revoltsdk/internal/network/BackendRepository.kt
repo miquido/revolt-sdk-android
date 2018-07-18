@@ -1,7 +1,6 @@
 package com.miquido.revoltsdk.internal.network
 
 import com.google.gson.Gson
-import com.miquido.revoltsdk.internal.RevoltApi
 import com.miquido.revoltsdk.internal.model.EventModel
 import java.io.IOException
 

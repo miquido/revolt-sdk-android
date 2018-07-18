@@ -8,9 +8,17 @@ import java.util.UUID
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal data class MetaDataModel(private var type: String) {
+internal class MetaDataModel {
     private var id: String = UUID.randomUUID().toString()
-    private var timestamp: Long = System.currentTimeMillis()
+    private var timestamp: Long
+    private var type: String
+
+    constructor(type: String) : this(type, System.currentTimeMillis())
+
+    constructor(type: String, timestamp: Long) {
+        this.type = type
+        this.timestamp = timestamp
+    }
 
     fun getJson(): JsonObject {
         val json = JsonObject()
@@ -22,6 +30,10 @@ internal data class MetaDataModel(private var type: String) {
 
     fun getTimestamp(): Long {
         return timestamp
+    }
+
+    fun getType(): String {
+        return type
     }
 
     companion object {

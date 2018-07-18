@@ -1,6 +1,5 @@
 package com.miquido.revoltsdk.internal.network
 
-import com.miquido.revoltsdk.internal.RevoltApi
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

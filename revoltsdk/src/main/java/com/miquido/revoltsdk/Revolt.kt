@@ -9,6 +9,7 @@ import com.miquido.revoltsdk.internal.configuration.ConfigurationRepository
 import com.miquido.revoltsdk.internal.configuration.DefaultConfiguration
 import com.miquido.revoltsdk.internal.configuration.EventDelay
 import com.miquido.revoltsdk.internal.configuration.RevoltConfiguration
+import com.miquido.revoltsdk.internal.database.DatabaseBuilder
 import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
@@ -40,7 +41,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                 revoltConfiguration.secretKey
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
-        val databaseRepository = DatabaseRepository()
+        val databaseRepository = DatabaseRepository(DatabaseBuilder(context).getEventsDao())
         revoltService = RevoltService(revoltConfiguration.eventDelay,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
