@@ -9,6 +9,7 @@ import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.model.EventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
+import kotlin.math.log2
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
@@ -31,6 +32,10 @@ internal class RevoltService(private val eventDelayMillis: Long,
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
         handler = Handler(thread.looper)
+    }
+
+    companion object {
+        private const val MAX_REQUEST_ERROR_RETRY_ATTEMPTS = 100
     }
 
     fun addEvent(event: Event) = postTask(saveEventInDatabaseTask(EventModel(event)))
@@ -124,11 +129,12 @@ internal class RevoltService(private val eventDelayMillis: Long,
         }
     }
 
-    private fun isRetryRequired() = sendingAttempts > 0 || requestEventErrorRetryCounter > 100
+    private fun isRetryRequired() = sendingAttempts > 0 || requestEventErrorRetryCounter > MAX_REQUEST_ERROR_RETRY_ATTEMPTS
 
     private fun getTimeToRetrySendingEvent(): Long {
         val intervalTimeMillis = when {
-            requestEventErrorRetryCounter > 100 -> getRetryInterval(100 - requestEventErrorRetryCounter)
+            requestEventErrorRetryCounter > MAX_REQUEST_ERROR_RETRY_ATTEMPTS ->
+                getRetryInterval(MAX_REQUEST_ERROR_RETRY_ATTEMPTS - requestEventErrorRetryCounter)
             else -> getRetryInterval(sendingAttempts)
         }
         val retryTime = lastAttemptTime + intervalTimeMillis - System.currentTimeMillis()
@@ -136,8 +142,9 @@ internal class RevoltService(private val eventDelayMillis: Long,
         return Math.max(retryTime, 0)
     }
 
-    private fun getRetryInterval(attempts: Int) : Long {
-        if (attempts > 10) {
+    private fun getRetryInterval(attempts: Int): Long {
+        val maxAttempts = log2(maxSendingRetryTimeSeconds.toDouble() / firstSendingRetryTimeSeconds) + 1
+        if (attempts > maxAttempts) {
             return maxSendingRetryTimeSeconds.secondsToMillis()
         }
         return Math.min(powOf2(attempts - 1) * firstSendingRetryTimeSeconds, maxSendingRetryTimeSeconds).secondsToMillis()
