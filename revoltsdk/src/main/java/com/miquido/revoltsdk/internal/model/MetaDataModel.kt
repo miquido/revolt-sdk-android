@@ -2,27 +2,17 @@ package com.miquido.revoltsdk.internal.model
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
-import java.util.UUID
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal data class MetaDataModel(private val type: String) {
-    private val id: String = UUID.randomUUID().toString()
-    internal val timestamp: Long = System.currentTimeMillis()
+internal data class MetaDataModel(val id: String, val type: String, val timestamp: Long) {
 
-    fun getJson(): JsonObject {
-        val json = JsonObject()
-        json.add(ID, JsonPrimitive(id))
-        json.add(TYPE, JsonPrimitive(type))
-        json.add(TIMESTAMP, JsonPrimitive(timestamp))
-        return json
-    }
-
-    companion object {
-        const val ID: String = "id"
-        const val TIMESTAMP: String = "timestamp"
-        const val TYPE: String = "type"
-    }
+    fun getJson(): JsonObject =
+            JsonObject().apply {
+                add("id", JsonPrimitive(id))
+                add("timestamp", JsonPrimitive(type))
+                add("type", JsonPrimitive(timestamp))
+            }
 }
