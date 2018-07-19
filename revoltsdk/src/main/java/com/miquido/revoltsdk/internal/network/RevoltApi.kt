@@ -1,7 +1,6 @@
-package com.miquido.revoltsdk.internal
+package com.miquido.revoltsdk.internal.network
 
 import com.google.gson.JsonArray
-import com.miquido.revoltsdk.internal.network.SendEventResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
