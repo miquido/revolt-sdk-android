@@ -36,11 +36,11 @@ internal class RevoltService(private val context: Context,
 
     private val handler: Handler
     private val sendEventTask = ::sendEvent
+    private val broadcastReceiver = createNetworkStatesBroadcast()
     private var sendingAttempts = 0
     private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
     private var hasInternetConnection = true
-    private var broadcastReceiver = createNetworkStatesBroadcast()
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
