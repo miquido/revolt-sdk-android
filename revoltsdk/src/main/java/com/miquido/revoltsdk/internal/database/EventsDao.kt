@@ -21,7 +21,7 @@ internal interface EventsDao {
     fun getFirstElement(): EventEntity?
 
     @Query("SELECT * FROM ${EventEntity.TABLE_NAME} ORDER BY id ASC LIMIT :number")
-    fun getFirstElements(number: Int): List<EventEntity>?
+    fun getFirstElements(number: Int): List<EventEntity>
 
     @Query("DELETE FROM ${EventEntity.TABLE_NAME} WHERE id IN (SELECT id FROM ${EventEntity.TABLE_NAME} ORDER BY id ASC LIMIT :number)")
     fun removeEvents(number: Int)

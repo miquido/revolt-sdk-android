@@ -62,7 +62,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
             return
         }
 
-        val eventsToSend = databaseRepository.getFirstEvents(batchSize)
+        val eventsToSend = databaseRepository.getFirstEvents(batchSize).map { it.eventData.asJsonObject() }
         RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
 
         val response = backendRepository.sendEvents(eventsToSend)
