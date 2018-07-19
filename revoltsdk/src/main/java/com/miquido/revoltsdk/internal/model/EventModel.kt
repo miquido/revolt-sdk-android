@@ -19,7 +19,7 @@ internal data class EventModel(private val event: Event) {
     }
 
     fun getTimestamp(): Long {
-        return metaDataModel.getTimestamp()
+        return metaDataModel.timestamp
     }
 
     companion object {

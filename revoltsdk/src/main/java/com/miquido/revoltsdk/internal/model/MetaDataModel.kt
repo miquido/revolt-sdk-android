@@ -10,7 +10,7 @@ import java.util.UUID
  */
 internal data class MetaDataModel(private val type: String) {
     private val id: String = UUID.randomUUID().toString()
-    private val timestamp: Long = System.currentTimeMillis()
+    internal val timestamp: Long = System.currentTimeMillis()
 
     fun getJson(): JsonObject {
         val json = JsonObject()
@@ -18,10 +18,6 @@ internal data class MetaDataModel(private val type: String) {
         json.add(TYPE, JsonPrimitive(type))
         json.add(TIMESTAMP, JsonPrimitive(timestamp))
         return json
-    }
-
-    fun getTimestamp(): Long {
-        return timestamp
     }
 
     companion object {
