@@ -7,6 +7,7 @@ import com.miquido.revoltsdk.internal.database.DatabaseRepository
 import com.miquido.revoltsdk.Event
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.model.EventModel
+import com.miquido.revoltsdk.internal.model.createNewEventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
 import kotlin.math.log2
@@ -38,7 +39,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
         private const val MAX_REQUEST_ERROR_RETRY_ATTEMPTS = 100
     }
 
-    fun addEvent(event: Event) = postTask(saveEventInDatabaseTask(EventModel(event)))
+    fun addEvent(event: Event) = postTask(saveEventInDatabaseTask(createNewEventModel(event)))
 
     private fun postTask(task: () -> Unit) = handler.post(task)
 
@@ -47,16 +48,14 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private fun postTaskWithDelay(task: () -> Unit, millis: Long) = handler.postDelayed(task, millis)
 
     private fun saveEventInDatabaseTask(eventModel: EventModel): () -> Unit = {
-        RevoltLogger.d("Adding events to database")
-
         databaseRepository.addEvent(eventModel)
         createNextSendingEventTask()
     }
 
     private fun sendEvent() {
-        RevoltLogger.d("Sending events to backend")
-
         val millisToSend = getTimeToSendEvent() ?: return
+
+        RevoltLogger.d("Sending events to backend in $millisToSend milliseconds")
 
         if (millisToSend > 0) {
             removeTask(sendEventTask)
@@ -64,7 +63,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
             return
         }
 
-        val eventsToSend = databaseRepository.getFirstEvents(batchSize)
+        val eventsToSend = databaseRepository.getFirstEventsAsJson(batchSize)
         RevoltLogger.d("Events number to be send: ${eventsToSend.size}")
 
         val response = backendRepository.sendEvents(eventsToSend)
@@ -152,15 +151,12 @@ internal class RevoltService(private val eventDelayMillis: Long,
 
     private fun powOf2(n: Int) = 1 shl n
 
-
     private fun getTimeToSendEvent(): Long? {
         if (databaseRepository.getEventsNumber() >= batchSize) {
             return 0L
         }
 
-        val firstEvent = databaseRepository.getFirstEvent() ?: return null
-
-        val firstEventTime = firstEvent.getTimestamp()
+        val firstEventTime = databaseRepository.getFirstEventTimestamp() ?: return null
 
         val timeToSend = firstEventTime + eventDelayMillis - System.currentTimeMillis()
         return Math.max(timeToSend, 0)

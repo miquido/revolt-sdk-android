@@ -1,6 +1,6 @@
 package com.miquido.revolt
 
-import android.app.Application
+import com.facebook.stetho.Stetho
 import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 
@@ -10,4 +10,11 @@ import dagger.android.support.DaggerApplication
  */
 class RevoltApplication : DaggerApplication() {
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> = DaggerAppComponent.builder().create(this)
+
+
+    override fun onCreate() {
+        super.onCreate()
+        Stetho.initializeWithDefaults(this)
+    }
+
 }
