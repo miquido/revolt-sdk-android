@@ -1,5 +1,11 @@
 package com.miquido.revoltsdk.internal
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Process
@@ -10,12 +16,17 @@ import com.miquido.revoltsdk.internal.model.EventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
 import kotlin.math.log2
+import android.net.NetworkInfo
+import android.support.v4.content.ContextCompat.getSystemService
+
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class RevoltService(private val eventDelayMillis: Long,
+@Suppress("DEPRECATION")
+internal class RevoltService(private val context: Context,
+                             private val eventDelayMillis: Long,
                              private val batchSize: Int,
                              private val backendRepository: BackendRepository,
                              private val databaseRepository: DatabaseRepository,
@@ -27,11 +38,14 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private var sendingAttempts = 0
     private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
+    private var hasInternetConnection = true
+    private var broadcastReceiver = createNetworkStatesBroadcast()
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
         handler = Handler(thread.looper)
+        context.registerReceiver(broadcastReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     companion object {
@@ -71,6 +85,23 @@ internal class RevoltService(private val eventDelayMillis: Long,
         handleResponse(response)
 
         createNextSendingEventTask()
+    }
+
+    private fun createNetworkStatesBroadcast() = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            RevoltLogger.d("Receive network change broadcast")
+            postTask(networkStateChangesTask())
+        }
+    };
+
+    @SuppressLint("MissingPermission")
+    private fun networkStateChangesTask(): () -> Unit = {
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netInfo = manager.activeNetworkInfo
+        hasInternetConnection = netInfo != null && netInfo.isConnected
+        if (hasInternetConnection) {
+            createNextSendingEventTask()
+        }
     }
 
     private fun handleResponse(result: SendEventsResult) {
@@ -113,6 +144,10 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private fun createNextSendingEventTask() {
         removeTask(sendEventTask)
 
+        if (!hasInternetConnection) {
+            return
+        }
+
         val timeMillisToSendEvents = when {
             isRetryRequired() -> getTimeToRetrySendingEvent()
             else -> getTimeToSendEvent()
@@ -151,7 +186,6 @@ internal class RevoltService(private val eventDelayMillis: Long,
     }
 
     private fun powOf2(n: Int) = 1 shl n
-
 
     private fun getTimeToSendEvent(): Long? {
         if (databaseRepository.getEventsNumber() >= batchSize) {

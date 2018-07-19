@@ -40,7 +40,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository()
-        revoltService = RevoltService(revoltConfiguration.eventDelayMillis,
+        revoltService = RevoltService(context,
+                revoltConfiguration.eventDelayMillis,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
                 databaseRepository,
@@ -135,7 +136,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             if (!hasPermission(context, Manifest.permission.INTERNET)) {
                 throw IllegalArgumentException("INTERNET permission is required.")
             }
-
+            if (!hasPermission(context, Manifest.permission.ACCESS_NETWORK_STATE)) {
+                throw IllegalArgumentException("ACCESS_NETWORK_STATE permission is required.")
+            }
             return Revolt(createConfiguration(), context)
         }
 
