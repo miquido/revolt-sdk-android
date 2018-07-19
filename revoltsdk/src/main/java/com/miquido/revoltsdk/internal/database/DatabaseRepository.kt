@@ -1,8 +1,9 @@
 package com.miquido.revoltsdk.internal.database
 
+import com.google.gson.JsonObject
+import com.miquido.revoltsdk.internal.asJsonObject
 import com.miquido.revoltsdk.internal.model.EventModel
-import com.miquido.revoltsdk.internal.toEntity
-import com.miquido.revoltsdk.internal.toModel
+import java.util.*
 
 /** Created by MiQUiDO on 09.07.2018.
  * <p>
@@ -14,21 +15,23 @@ internal class DatabaseRepository(private val eventsDao: EventsDao) {
         return eventsDao.countAllEvents()
     }
 
-    fun getFirstEvents(number: Int): List<EventModel>? {
-        return eventsDao.getFirstElements(number)?.map { it.toModel() }
+    fun getFirstEvents(number: Int): List<JsonObject> {
+        return eventsDao.getFirstElements(number)?.map { it.eventData.asJsonObject() } ?: Collections.emptyList()
     }
 
     fun removeEvents(number: Int) {
         eventsDao.removeEvents(number)
     }
 
-    fun getFirstEvent(): EventModel? {
-        return eventsDao.getFirstElement()?.toModel()
+    fun getFirstEventTimestamp(): Long? {
+        return eventsDao.getFirstElement()?.timestamp
     }
 
     fun addEvent(event: EventModel) {
         eventsDao.insert(event.toEntity())
     }
+}
 
-
+internal fun EventModel.toEntity(): EventEntity {
+    return EventEntity(this.createJson().toString(), this.getTimestamp())
 }

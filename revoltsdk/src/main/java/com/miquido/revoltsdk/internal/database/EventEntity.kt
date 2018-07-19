@@ -10,8 +10,7 @@ import com.miquido.revoltsdk.internal.database.EventEntity.Companion.TABLE_NAME
  */
 @Entity(tableName = TABLE_NAME)
 internal data class EventEntity(val eventData: String,
-                       val timestamp: Long,
-                       val type: String) {
+                                val timestamp: Long) {
 
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

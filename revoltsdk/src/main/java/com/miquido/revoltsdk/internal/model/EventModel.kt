@@ -7,21 +7,13 @@ import com.miquido.revoltsdk.Event
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class EventModel {
+internal data class EventModel(private val event: Event) {
 
-    private val metaDataModel: MetaDataModel
-    private val event: Event
-
-    constructor(event: Event) : this(event, MetaDataModel(event.getType()))
-
-    constructor(event: Event, metaDataModel: MetaDataModel) {
-        this.metaDataModel = metaDataModel
-        this.event = event
-    }
+    private val metaDataModel: MetaDataModel = MetaDataModel(event.getType())
 
     internal fun createJson(): JsonObject {
         val json = JsonObject()
-        json.add(EVENT, event.getJson())
+        json.add(DATA, event.getJson())
         json.add(METADATA, metaDataModel.getJson())
         return json
     }
@@ -30,12 +22,8 @@ internal class EventModel {
         return metaDataModel.getTimestamp()
     }
 
-    fun getType(): String {
-        return metaDataModel.getType()
-    }
-
     companion object {
         const val METADATA = "meta"
-        const val EVENT = "data"
+        const val DATA = "data"
     }
 }

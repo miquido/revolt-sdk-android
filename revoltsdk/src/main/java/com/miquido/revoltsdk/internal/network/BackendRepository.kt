@@ -1,7 +1,7 @@
 package com.miquido.revoltsdk.internal.network
 
 import com.google.gson.Gson
-import com.miquido.revoltsdk.internal.model.EventModel
+import com.google.gson.JsonObject
 import java.io.IOException
 
 /** Created by MiQUiDO on 09.07.2018.
@@ -14,8 +14,8 @@ internal class BackendRepository(private val revoltApi: RevoltApi) {
         const val STATUS_CODE_SERVER_ERROR = 500
     }
 
-    fun sendEvents(events: ArrayList<EventModel>): SendEventsResult {
-        val array = Gson().toJsonTree(events.map { it.createJson() }).asJsonArray
+    fun sendEvents(events: List<JsonObject>): SendEventsResult {
+        val array = Gson().toJsonTree(events).asJsonArray
         return try {
             val response = revoltApi.send(array).execute()
             when {
