@@ -1,11 +1,7 @@
 package com.miquido.revoltsdk.internal
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.ConnectivityManager
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Process
@@ -17,16 +13,15 @@ import com.miquido.revoltsdk.internal.model.createNewEventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
 import kotlin.math.log2
-import android.net.NetworkInfo
-import android.support.v4.content.ContextCompat.getSystemService
+import com.miquido.revoltsdk.internal.network.NetworkStateService
 
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-@Suppress("DEPRECATION")
-internal class RevoltService(private val context: Context,
+@SuppressLint("MissingPermission")
+internal class RevoltService(context: Context,
                              private val eventDelayMillis: Long,
                              private val batchSize: Int,
                              private val backendRepository: BackendRepository,
@@ -36,17 +31,22 @@ internal class RevoltService(private val context: Context,
 
     private val handler: Handler
     private val sendEventTask = ::sendEvent
-    private val broadcastReceiver = createNetworkStatesBroadcast()
     private var sendingAttempts = 0
     private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
     private var hasInternetConnection = true
+    private val networkStateService = NetworkStateService(context, object : NetworkStateService.NetworkStateListener {
+        override fun onNetworkStateChange(isConnected: Boolean) {
+            hasInternetConnection = isConnected
+            postTask(networkStateChangesTask())
+        }
+    })
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
         handler = Handler(thread.looper)
-        context.registerReceiver(broadcastReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        networkStateService.start()
     }
 
     companion object {
@@ -67,6 +67,10 @@ internal class RevoltService(private val context: Context,
     }
 
     private fun sendEvent() {
+        if (!hasInternetConnection) {
+            return
+        }
+
         val millisToSend = getTimeToSendEvent() ?: return
 
         RevoltLogger.d("Sending events to backend in $millisToSend milliseconds")
@@ -86,19 +90,11 @@ internal class RevoltService(private val context: Context,
         createNextSendingEventTask()
     }
 
-    private fun createNetworkStatesBroadcast() = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            RevoltLogger.d("Receive network change broadcast")
-            postTask(networkStateChangesTask())
-        }
-    };
 
-    @SuppressLint("MissingPermission")
     private fun networkStateChangesTask(): () -> Unit = {
-        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val netInfo = manager.activeNetworkInfo
-        hasInternetConnection = netInfo != null && netInfo.isConnected
+        RevoltLogger.d("Network state change: hasConnection: $hasInternetConnection")
         if (hasInternetConnection) {
+            clearRetryData()
             createNextSendingEventTask()
         }
     }
