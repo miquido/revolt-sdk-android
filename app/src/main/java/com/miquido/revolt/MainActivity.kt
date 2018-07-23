@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.miquido.revoltsdk.Revolt
 import com.miquido.revoltsdk.RevoltEvent
+import com.miquido.revoltsdk.UserProfileEvent
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -27,20 +28,11 @@ class MainActivity : AppCompatActivity() {
             Log.d("Revolt-SDK damian", " before events + ${System.currentTimeMillis()}")
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE1-${rand()}", "a", "b"))
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE2-${rand()}", "a", "b"))
-            //Thread.sleep(15_100)
-           /* revoltSDK.sendEvent(RevoltEvent("MY_TYPE3", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE4", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE5", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE6", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE7", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE8", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE9", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE10", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE11", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE12", "a", "b"))*/
+            revoltSDK.sendEvent(UserProfileEvent.builder()
+                    .appUserId("userID")
+                    .pairs(Pair("aaa", "bbb"), Pair("ccc", "ddd"))
+                    .pairs(Pair("eee", "fff"))
+                    .build())
             Log.d("Revolt-SDK damian", " after events + ${System.currentTimeMillis()}")
         }
     }
