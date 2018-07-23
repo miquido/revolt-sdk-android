@@ -12,7 +12,7 @@ import com.miquido.revoltsdk.internal.model.createNewEventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
 import kotlin.math.log2
-import com.miquido.revoltsdk.internal.network.service.NetworkStateService
+import com.miquido.revoltsdk.internal.connection.NetworkStateService
 
 
 /** Created by MiQUiDO on 03.07.2018.
@@ -33,17 +33,17 @@ internal class RevoltService(private val eventDelayMillis: Long,
     private var sendingAttempts = 0
     private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
-    private var hasInternetConnection = true
+    private var hasInternetConnection: Boolean
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
         handler = Handler(thread.looper)
-        networkStateService.registerCallback(object : NetworkStateService.NetworkStateListener {
-            override fun onNetworkStateChange(isConnected: Boolean) {
-                postTaskAtFront(networkStateChangesTask(isConnected))
-            }
-        })
+
+        networkStateService.registerCallback { isConnected: Boolean ->
+            postTaskAtFront(networkStateChangesTask(isConnected))
+        }
+        hasInternetConnection = networkStateService.getNetworkState()
         networkStateService.start()
     }
 

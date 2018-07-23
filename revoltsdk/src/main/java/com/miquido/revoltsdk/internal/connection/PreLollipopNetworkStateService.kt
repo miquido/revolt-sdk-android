@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk.internal.network.service
+package com.miquido.revoltsdk.internal.connection
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -15,8 +15,14 @@ import com.miquido.revoltsdk.internal.log.RevoltLogger
 @Suppress("DEPRECATION")
 @SuppressLint("MissingPermission")
 class PreLollipopNetworkStateService(private val context: Context) : NetworkStateService(context) {
-    override fun setNetworkStatesListener() {
+
+    override fun start() {
         context.registerReceiver(createNetworkStatesBroadcast(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+    }
+
+    override fun getNetworkState(): Boolean {
+        val netInfo = manager.activeNetworkInfo
+        return netInfo != null && netInfo.isConnected
     }
 
     private fun createNetworkStatesBroadcast() = object : BroadcastReceiver() {
@@ -25,7 +31,7 @@ class PreLollipopNetworkStateService(private val context: Context) : NetworkStat
             val netInfo = manager.activeNetworkInfo
             val hasConnection = netInfo != null && netInfo.isConnected
             RevoltLogger.d("NetworkStateService Receive network change broadcast, hasConnection: $hasConnection ")
-            networkStateListener?.onNetworkStateChange(hasConnection)
+            networkCallback?.invoke(hasConnection)
         }
     }
 }

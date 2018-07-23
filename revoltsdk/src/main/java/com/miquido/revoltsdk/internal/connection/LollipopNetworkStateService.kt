@@ -1,4 +1,4 @@
-package com.miquido.revoltsdk.internal.network.service
+package com.miquido.revoltsdk.internal.connection
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -17,7 +17,8 @@ import android.support.annotation.RequiresApi
 @SuppressLint("MissingPermission")
 class LollipopNetworkStateService(context: Context) : NetworkStateService(context) {
     private var isConnected = true
-    override fun setNetworkStatesListener() {
+
+    override fun start() {
         val networkRequest = NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -34,12 +35,16 @@ class LollipopNetworkStateService(context: Context) : NetworkStateService(contex
         })
     }
 
+    override fun getNetworkState(): Boolean {
+        return manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
+    }
+
     private fun onNetworkStateChanged() {
         val connectionStatus = manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
 
         if (isConnected != connectionStatus) {
             isConnected = connectionStatus
-            networkStateListener?.onNetworkStateChange(connectionStatus)
+            networkCallback?.invoke(connectionStatus)
         }
     }
 }

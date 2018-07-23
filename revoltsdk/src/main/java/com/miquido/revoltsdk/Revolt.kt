@@ -14,9 +14,7 @@ import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
-import com.miquido.revoltsdk.internal.network.service.LollipopNetworkStateService
-import com.miquido.revoltsdk.internal.network.service.NetworkStateService
-import com.miquido.revoltsdk.internal.network.service.PreLollipopNetworkStateService
+import com.miquido.revoltsdk.internal.connection.createNetworkStateService
 import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -68,14 +66,6 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
     private fun startSession() {
         revoltService.addEvent(appInstanceDataEventGenerator.generateEvent())
-    }
-
-    private fun createNetworkStateService(context: Context): NetworkStateService {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            LollipopNetworkStateService(context)
-        } else {
-            PreLollipopNetworkStateService(context)
-        }
     }
 
     class BuilderContext {
