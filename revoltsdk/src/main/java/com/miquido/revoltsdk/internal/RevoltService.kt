@@ -1,5 +1,6 @@
 package com.miquido.revoltsdk.internal
 
+import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Process
@@ -11,28 +12,39 @@ import com.miquido.revoltsdk.internal.model.createNewEventModel
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.SendEventsResult
 import kotlin.math.log2
+import com.miquido.revoltsdk.internal.connection.NetworkStateService
+
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
+@SuppressLint("MissingPermission")
 internal class RevoltService(private val eventDelayMillis: Long,
                              private val batchSize: Int,
                              private val backendRepository: BackendRepository,
                              private val databaseRepository: DatabaseRepository,
                              private val firstSendingRetryTimeSeconds: Int,
-                             private val maxSendingRetryTimeSeconds: Int) {
+                             private val maxSendingRetryTimeSeconds: Int,
+                             networkStateService: NetworkStateService) {
 
     private val handler: Handler
     private val sendEventTask = ::sendEvent
     private var sendingAttempts = 0
     private var lastAttemptTimeMillis = 0L
     private var requestEventErrorRetryCounter = 0
+    private var hasInternetConnection: Boolean
 
     init {
         val thread = HandlerThread("RevoltThread", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
         handler = Handler(thread.looper)
+
+        networkStateService.registerCallback { isConnected: Boolean ->
+            postTaskAtFront(networkStateChangesTask(isConnected))
+        }
+        hasInternetConnection = networkStateService.isConnected()
+        networkStateService.start()
     }
 
     companion object {
@@ -42,6 +54,8 @@ internal class RevoltService(private val eventDelayMillis: Long,
     fun addEvent(event: Event) = postTask(saveEventInDatabaseTask(createNewEventModel(event)))
 
     private fun postTask(task: () -> Unit) = handler.post(task)
+
+    private fun postTaskAtFront(task: () -> Unit) = handler.postAtFrontOfQueue(task)
 
     private fun removeTask(task: () -> Unit) = handler.removeCallbacks(task)
 
@@ -53,6 +67,10 @@ internal class RevoltService(private val eventDelayMillis: Long,
     }
 
     private fun sendEvent() {
+        if (!hasInternetConnection) {
+            return
+        }
+
         val millisToSend = getTimeToSendEvent() ?: return
 
         RevoltLogger.d("Sending events to backend in $millisToSend milliseconds")
@@ -70,6 +88,16 @@ internal class RevoltService(private val eventDelayMillis: Long,
         handleResponse(response)
 
         createNextSendingEventTask()
+    }
+
+
+    private fun networkStateChangesTask(isConnected: Boolean): () -> Unit = {
+        hasInternetConnection = isConnected
+        RevoltLogger.d("Network state change: hasConnection: $hasInternetConnection")
+        if (isConnected) {
+            clearRetryData()
+            createNextSendingEventTask()
+        }
     }
 
     private fun handleResponse(result: SendEventsResult) {
@@ -111,6 +139,10 @@ internal class RevoltService(private val eventDelayMillis: Long,
 
     private fun createNextSendingEventTask() {
         removeTask(sendEventTask)
+
+        if (!hasInternetConnection) {
+            return
+        }
 
         val timeMillisToSendEvents = when {
             isRetryRequired() -> getTimeToRetrySendingEvent()

@@ -14,6 +14,7 @@ import com.miquido.revoltsdk.internal.hasPermission
 import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
+import com.miquido.revoltsdk.internal.connection.createNetworkStateService
 import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -46,7 +47,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                 backendRepository,
                 databaseRepository,
                 revoltConfiguration.firstRetryTimeSeconds,
-                revoltConfiguration.maxRetryTimeSeconds)
+                revoltConfiguration.maxRetryTimeSeconds,
+                createNetworkStateService(context))
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
 
@@ -136,7 +138,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             if (!hasPermission(context, Manifest.permission.INTERNET)) {
                 throw IllegalArgumentException("INTERNET permission is required.")
             }
-
+            if (!hasPermission(context, Manifest.permission.ACCESS_NETWORK_STATE)) {
+                throw IllegalArgumentException("ACCESS_NETWORK_STATE permission is required.")
+            }
             return Revolt(createConfiguration(), context)
         }
 

@@ -12,7 +12,7 @@ internal data class MetaDataModel(val id: String, val type: String, val timestam
     fun getJson(): JsonObject =
             JsonObject().apply {
                 add("id", JsonPrimitive(id))
-                add("timestamp", JsonPrimitive(type))
-                add("type", JsonPrimitive(timestamp))
+                add("timestamp", JsonPrimitive(timestamp))
+                add("type", JsonPrimitive(type))
             }
 }
