@@ -3,11 +3,7 @@ package com.miquido.revolt
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.miquido.revoltsdk.Gender
-import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.RevoltEvent
-import com.miquido.revoltsdk.UserSignOutEvent
-import com.miquido.revoltsdk.userProfileBuilder
+import com.miquido.revoltsdk.*
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -30,15 +26,18 @@ class MainActivity : AppCompatActivity() {
             Log.d("Revolt-SDK", " before events + ${System.currentTimeMillis()}")
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE1-${rand()}", "a", "b"))
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE2-${rand()}", "a", "b"))
-            revoltSDK.sendEvent(userProfileBuilder()
-                    .appUserId("userID")
+            revoltSDK.sendEvent(buildUserSignInEvent("12345"))
+            revoltSDK.sendEvent(buildUserProfileEvent("12345")
+                    .birthYear(1990)
                     .gender(Gender.M)
-                    .customProperties("aaa" to "bbb", "ccc" to "ddd")
-                    .customProperties("eee" to "fff")
-                    .customProperty("yyy", "zzz")
+                    .city("Krakow")
+                    .customProperties(
+                            "heightCm" to 175,
+                            "weightKg" to 70,
+                            "eyeColor" to "blue")
                     .build())
-            revoltSDK.sendEvent(UserSignOutEvent("LoggedOutId"))
-            Log.d("Revolt-SDK", " after events + ${System.currentTimeMillis()}")
+            revoltSDK.sendEvent(buildUserSignOutEvent("12345"))
+            Log.d("Revolt-SDK damian", " after events + ${System.currentTimeMillis()}")
         }
     }
 
