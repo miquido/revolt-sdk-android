@@ -16,7 +16,7 @@ import android.support.annotation.RequiresApi
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 @SuppressLint("MissingPermission")
 class LollipopNetworkStateService(context: Context) : NetworkStateService(context) {
-    private var isConnected = true
+    private var isConnected: Boolean? = null
 
     override fun start() {
         val networkRequest = NetworkRequest.Builder()
@@ -33,18 +33,19 @@ class LollipopNetworkStateService(context: Context) : NetworkStateService(contex
                 onNetworkStateChanged()
             }
         })
+        isConnected = isConnected()
     }
 
-    override fun getNetworkState(): Boolean {
+    override fun isConnected(): Boolean {
         return manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
     }
 
     private fun onNetworkStateChanged() {
-        val connectionStatus = manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
+        val connectionStatus = isConnected()
 
         if (isConnected != connectionStatus) {
             isConnected = connectionStatus
-            networkCallback?.invoke(connectionStatus)
+            networkStateCallback?.invoke(connectionStatus)
         }
     }
 }

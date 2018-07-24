@@ -20,7 +20,7 @@ class PreLollipopNetworkStateService(private val context: Context) : NetworkStat
         context.registerReceiver(createNetworkStatesBroadcast(), IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
-    override fun getNetworkState(): Boolean {
+    override fun isConnected(): Boolean {
         val netInfo = manager.activeNetworkInfo
         return netInfo != null && netInfo.isConnected
     }
@@ -28,10 +28,9 @@ class PreLollipopNetworkStateService(private val context: Context) : NetworkStat
     private fun createNetworkStatesBroadcast() = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            val netInfo = manager.activeNetworkInfo
-            val hasConnection = netInfo != null && netInfo.isConnected
+            val hasConnection = isConnected()
             RevoltLogger.d("NetworkStateService Receive network change broadcast, hasConnection: $hasConnection ")
-            networkCallback?.invoke(hasConnection)
+            networkStateCallback?.invoke(hasConnection)
         }
     }
 }

@@ -43,7 +43,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
         networkStateService.registerCallback { isConnected: Boolean ->
             postTaskAtFront(networkStateChangesTask(isConnected))
         }
-        hasInternetConnection = networkStateService.getNetworkState()
+        hasInternetConnection = networkStateService.isConnected()
         networkStateService.start()
     }
 

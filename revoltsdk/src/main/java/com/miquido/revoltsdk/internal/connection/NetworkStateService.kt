@@ -9,13 +9,13 @@ import android.net.ConnectivityManager
  */
 abstract class NetworkStateService(context: Context) {
     protected val manager: ConnectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    protected var networkCallback: ((Boolean) -> Boolean)? = null
+    protected var networkStateCallback: ((Boolean) -> Unit)? = null
 
     abstract fun start()
 
-    abstract fun getNetworkState(): Boolean
+    abstract fun isConnected(): Boolean
 
-    fun registerCallback(function: (Boolean) -> Boolean) {
-        this.networkCallback = function
+    fun registerCallback(callback: (isConnected: Boolean) -> Unit) {
+        this.networkStateCallback = callback
     }
 }
