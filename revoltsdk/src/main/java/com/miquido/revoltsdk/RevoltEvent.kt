@@ -2,6 +2,7 @@ package com.miquido.revoltsdk
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.miquido.revoltsdk.internal.asJsonObject
 
 /** Created by MiQUiDO on 09.07.2018.
  * <p>
@@ -24,7 +25,7 @@ class RevoltEvent : Event {
     }
 
     constructor(type: String, map: Map<String, Any>) {
-        this.revoltData = Gson().toJsonTree(map).asJsonObject
+        this.revoltData = Gson().toJson(map).asJsonObject()
         this.type = type
     }
 

@@ -9,7 +9,9 @@ import com.miquido.revoltsdk.internal.asJsonObject
  */
 data class UserSignInEvent(private val appUserId: String) : Event {
 
-    override fun getJson(): JsonObject = appUserId.asJsonObject()
+    override fun getJson() = JsonObject().apply {
+        addProperty("appUserId", appUserId)
+    }
 
     override fun getType() = "user.signedIn"
 }

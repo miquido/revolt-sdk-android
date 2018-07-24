@@ -1,87 +1,64 @@
 package com.miquido.revoltsdk
 
-import com.google.gson.JsonObject
 
 /** Created by MiQUiDO on 19.07.2018.
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class UserProfileEvent(private val appUserId: String,
-                       private var birthYear: Int? = null,
-                       private var gender: Gender? = null,
-                       private var country: String? = null,
-                       private var city: String? = null,
-                       private var pairs: List<Pair<String, String>>? = null) : Event {
 
-    override fun getJson(): JsonObject {
-        val jsonObject = JsonObject().apply {
-            addProperty("appUserId", appUserId)
-            addProperty("birthYear", birthYear)
-            addProperty("gender", gender?.name)
-            addProperty("country", country)
-            addProperty("city", city)
+fun userProfileBuilder(): AppUserIdBuilder {
+    return AppUserIdBuilder()
+}
 
-        }
-        pairs?.forEach {
-            jsonObject.addProperty(it.first, it.second)
-        }
-        return jsonObject
+
+class AppUserIdBuilder {
+    fun appUserId(appUserId: String): Builder {
+        return Builder(appUserId)
+    }
+}
+
+class Builder(appUserId: String) {
+    private val properties: MutableMap<String, Any> = HashMap()
+
+    init {
+        properties["appUserId"] = appUserId
     }
 
-    override fun getType(): String {
-        return "user.profile"
+    fun build(): RevoltEvent {
+        return RevoltEvent("user.profile", properties)
     }
 
-    companion object {
-        fun builder(): AppUserIdBuilder {
-            return AppUserIdBuilder()
-        }
+    fun birthYear(year: Int): Builder {
+        properties["birthYear"] = year
+        return this
     }
 
-    class AppUserIdBuilder {
-        fun appUserId(appUserId: String): Builder {
-            return Builder(appUserId)
-        }
+    fun gender(gender: Gender): Builder {
+        properties["gender"] = gender.name
+        return this
     }
 
-    class Builder(private val appUserId: String) {
-        private var birthYear: Int? = null
-        private var gender: Gender? = null
-        private var country: String? = null
-        private var city: String? = null
-        private var pairs: ArrayList<Pair<String, String>>? = ArrayList()
-
-        fun build(): UserProfileEvent {
-            return UserProfileEvent(appUserId, birthYear, gender, country, city, pairs)
-        }
-
-        fun birthYear(year: Int): Builder {
-            this.birthYear = year
-            return this
-        }
-
-        fun gender(gender: Gender): Builder {
-            this.gender = gender
-            return this
-        }
-
-        fun country(country: String): Builder {
-            this.country = country
-            return this
-        }
-
-        fun city(city: String): Builder {
-            this.city = city
-            return this
-        }
-
-        fun pairs(vararg pairs: Pair<String, String>): Builder {
-            this.pairs?.addAll(pairs.toList())
-            return this
-        }
+    fun country(country: String): Builder {
+        properties["country"] = country
+        return this
     }
 
-    enum class Gender {
-        F, M
+    fun city(city: String): Builder {
+        properties["city"] = city
+        return this
     }
+
+    fun customProperty(key: String, value: Any): Builder {
+        this.properties[key] = value
+        return this
+    }
+
+    fun customProperties(vararg pairs: Pair<String, String>): Builder {
+        pairs.forEach { properties[it.first] = it.second }
+        return this
+    }
+}
+
+enum class Gender {
+    F, M
 }
