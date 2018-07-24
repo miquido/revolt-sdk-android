@@ -2,6 +2,7 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
+import com.miquido.revoltsdk.internal.ActivitiesChangesManager
 import com.miquido.revoltsdk.internal.RevoltService
 import com.miquido.revoltsdk.internal.ScreenSizeProvider
 import com.miquido.revoltsdk.internal.AppInstanceDataEventGenerator
@@ -15,6 +16,7 @@ import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
 import com.miquido.revoltsdk.internal.connection.createNetworkStateService
+import com.miquido.revoltsdk.internal.model.ActivityChangeEvent
 import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -42,6 +44,10 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository(DatabaseBuilder(context).getEventsDao())
+        if (revoltConfiguration.activitiesChangesEvent) {
+            val activitiesChangesManager = ActivitiesChangesManager(context)
+            activitiesChangesManager.registerCallback(::activityChanges)
+        }
         revoltService = RevoltService(revoltConfiguration.eventDelayMillis,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
@@ -53,7 +59,9 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         RevoltLogger.init(revoltConfiguration.logLevel)
 
         startSession()
+
     }
+
 
     /**
      * Send an event to the Revolt backend.
@@ -66,6 +74,10 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
     private fun startSession() {
         revoltService.addEvent(appInstanceDataEventGenerator.generateEvent())
+    }
+
+    private fun activityChanges(name: String, action: String) {
+        revoltService.addEvent(ActivityChangeEvent(name, action))
     }
 
     class BuilderContext {
@@ -98,6 +110,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
         private var firstRetryTimeSeconds = DefaultConfiguration.FIRST_RETRY_TIME_SECONDS
         private var maxRetryTimeSeconds = DefaultConfiguration.MAX_RETRY_TIME_SECONDS
+        private var activitiesChangesEvent = DefaultConfiguration.ACTIVITIES_CHANGES_EVENTS
 
         fun logLevel(revoltLogLevel: RevoltLogLevel): Revolt.Builder {
             this.revoltLogLevel = revoltLogLevel
@@ -134,6 +147,11 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
             return this
         }
 
+        fun activitiesChangesEvents(): Revolt.Builder {
+            this.activitiesChangesEvent = true
+            return this
+        }
+
         fun build(): Revolt {
             if (!hasPermission(context, Manifest.permission.INTERNET)) {
                 throw IllegalArgumentException("INTERNET permission is required.")
@@ -153,7 +171,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                     secretKey,
                     revoltLogLevel,
                     firstRetryTimeSeconds,
-                    maxRetryTimeSeconds)
+                    maxRetryTimeSeconds,
+                    activitiesChangesEvent)
         }
     }
 }

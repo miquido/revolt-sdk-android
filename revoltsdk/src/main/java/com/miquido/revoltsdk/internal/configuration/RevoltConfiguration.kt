@@ -16,5 +16,6 @@ internal data class RevoltConfiguration(
         var secretKey: String,
         var logLevel: RevoltLogLevel,
         var firstRetryTimeSeconds: Int,
-        var maxRetryTimeSeconds: Int
+        var maxRetryTimeSeconds: Int,
+        var activitiesChangesEvent: Boolean
 )
