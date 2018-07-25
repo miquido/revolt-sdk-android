@@ -3,8 +3,7 @@ package com.miquido.revolt
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.RevoltEvent
+import com.miquido.revoltsdk.*
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -24,23 +23,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sendEventButton.setOnClickListener {
-            Log.d("Revolt-SDK damian", " before events + ${System.currentTimeMillis()}")
+            Log.d("Revolt-SDK", " before events + ${System.currentTimeMillis()}")
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE1-${rand()}", "a", "b"))
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE2-${rand()}", "a", "b"))
-            //Thread.sleep(15_100)
-           /* revoltSDK.sendEvent(RevoltEvent("MY_TYPE3", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE4", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE5", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE6", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE7", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE8", "a", "b"))
-            //Thread.sleep(3_100)
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE9", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE10", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE11", "a", "b"))
-            revoltSDK.sendEvent(RevoltEvent("MY_TYPE12", "a", "b"))*/
+            revoltSDK.sendEvent(buildUserSignInEvent("12345"))
+            revoltSDK.sendEvent(buildUserProfileEvent("12345")
+                    .birthYear(1990)
+                    .gender(Gender.M)
+                    .city("Krakow")
+                    .customProperties(
+                            "heightCm" to 175,
+                            "weightKg" to 70,
+                            "eyeColor" to "blue")
+                    .build())
+            revoltSDK.sendEvent(buildUserSignOutEvent("12345"))
             Log.d("Revolt-SDK damian", " after events + ${System.currentTimeMillis()}")
         }
     }
