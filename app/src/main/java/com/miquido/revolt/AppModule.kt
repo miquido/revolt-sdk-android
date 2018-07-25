@@ -26,6 +26,7 @@ class AppModule {
                 .secretKey("ZjdMyTrmjVDC8Wr8")
                 .eventDelay(5, TimeUnit.SECONDS)
                 .maxBatchSize(10)
+                .offlineQueueMaxSize(14)
                 .logLevel(RevoltLogLevel.DEBUG)
                 .build()
     }

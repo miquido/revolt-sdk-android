@@ -48,6 +48,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
                 databaseRepository,
                 revoltConfiguration.firstRetryTimeSeconds,
                 revoltConfiguration.maxRetryTimeSeconds,
+                revoltConfiguration.offlineMaxSize,
                 createNetworkStateService(context))
         appInstanceDataEventGenerator = AppInstanceDataEventGenerator(ScreenSizeProvider(context), context)
         RevoltLogger.init(revoltConfiguration.logLevel)
