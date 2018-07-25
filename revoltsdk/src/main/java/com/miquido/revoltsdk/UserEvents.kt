@@ -30,7 +30,7 @@ class UserProfileEventBuilder(appUserId: String) {
     }
 
     fun country(country: String): UserProfileEventBuilder {
-        properties["gender"] = country
+        properties["country"] = country
         return this
     }
 
