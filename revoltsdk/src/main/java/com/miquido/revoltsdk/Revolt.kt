@@ -16,7 +16,6 @@ import com.miquido.revoltsdk.internal.log.RevoltLogger
 import com.miquido.revoltsdk.internal.network.BackendRepository
 import com.miquido.revoltsdk.internal.network.RevoltApiBuilder
 import com.miquido.revoltsdk.internal.connection.createNetworkStateService
-import com.miquido.revoltsdk.internal.model.ActivityChangeEvent
 import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 28.06.2018.
@@ -77,7 +76,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     }
 
     private fun activityChanges(name: String, action: String) {
-        revoltService.addEvent(ActivityChangeEvent(name, action))
+        revoltService.addEvent(RevoltEvent("app.activitiesChanges", "name" to name, "action" to action))
     }
 
     class BuilderContext {

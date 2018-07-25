@@ -9,7 +9,7 @@ import android.os.Bundle
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-class ActivitiesChangesManager(val context: Context) : Application.ActivityLifecycleCallbacks {
+internal class ActivitiesChangesManager(val context: Context) : Application.ActivityLifecycleCallbacks {
 
     private var callback: ((className: String, action: String) -> Unit)? = null
 
