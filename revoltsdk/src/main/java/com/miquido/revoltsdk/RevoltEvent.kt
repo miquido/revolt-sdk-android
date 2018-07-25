@@ -30,7 +30,7 @@ class RevoltEvent : Event {
     }
 
     constructor(type: String, vararg pairs: Pair<String, Any>) {
-        this.revoltData = Gson().toJsonTree(pairs).asJsonObject
+        this.revoltData =  Gson().toJson(pairs.toMap()).asJsonObject()
         this.type = type
     }
 
