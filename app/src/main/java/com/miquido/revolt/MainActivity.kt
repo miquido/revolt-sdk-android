@@ -39,6 +39,10 @@ class MainActivity : AppCompatActivity() {
             revoltSDK.sendEvent(buildUserSignOutEvent("12345"))
             Log.d("Revolt-SDK damian", " after events + ${System.currentTimeMillis()}")
         }
+
+        sendCustomButton.setOnClickListener {
+            revoltSDK.sendEvent(RevoltEvent("MY_TYPE-${rand()}", key.text.toString(), value.text.toString()))
+        }
     }
 
     private fun rand(): Int {
