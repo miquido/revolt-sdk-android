@@ -26,6 +26,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
                              private val databaseRepository: DatabaseRepository,
                              private val firstSendingRetryTimeSeconds: Int,
                              private val maxSendingRetryTimeSeconds: Int,
+                             private val offlineMaxSize: Int,
                              networkStateService: NetworkStateService) {
 
     private val handler: Handler
@@ -63,6 +64,10 @@ internal class RevoltService(private val eventDelayMillis: Long,
 
     private fun saveEventInDatabaseTask(eventModel: EventModel): () -> Unit = {
         databaseRepository.addEvent(eventModel)
+        val eventsNumber = databaseRepository.getEventsNumber()
+        if (eventsNumber > offlineMaxSize) {
+            databaseRepository.removeEvents(eventsNumber - offlineMaxSize)
+        }
         createNextSendingEventTask()
     }
 
