@@ -15,5 +15,4 @@ internal object DefaultConfiguration {
     val LOG_LEVEL = RevoltLogLevel.WARN
     const val FIRST_RETRY_TIME_SECONDS = 5
     const val MAX_RETRY_TIME_SECONDS = 600
-    const val ACTIVITIES_CHANGES_EVENTS = false
 }

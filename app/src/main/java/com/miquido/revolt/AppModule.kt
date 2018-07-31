@@ -27,7 +27,6 @@ class AppModule {
                 .eventDelay(5, TimeUnit.SECONDS)
                 .maxBatchSize(10)
                 .logLevel(RevoltLogLevel.DEBUG)
-                .activitiesChangesEvents()
                 .build()
     }
 }

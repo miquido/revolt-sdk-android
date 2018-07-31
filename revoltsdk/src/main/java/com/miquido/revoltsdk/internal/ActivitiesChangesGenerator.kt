@@ -9,11 +9,11 @@ import android.os.Bundle
  * <p>
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
-internal class ActivitiesChangesManager(val context: Context) : Application.ActivityLifecycleCallbacks {
+internal class ActivitiesChangesGenerator(val context: Context) : Application.ActivityLifecycleCallbacks {
 
     private var callback: ((className: String, action: String) -> Unit)? = null
 
-    init {
+    fun start() {
         (context as Application).registerActivityLifecycleCallbacks(this)
     }
 
@@ -22,31 +22,31 @@ internal class ActivitiesChangesManager(val context: Context) : Application.Acti
     }
 
     override fun onActivityPaused(p0: Activity) {
-        callback?.invoke(p0.localClassName, "onActivityPaused")
+        callback?.invoke(p0.localClassName, "paused")
     }
 
     override fun onActivityResumed(p0: Activity) {
-        callback?.invoke(p0.localClassName, "onActivityResumed")
+        callback?.invoke(p0.localClassName, "resumed")
     }
 
     override fun onActivityStarted(p0: Activity) {
-        callback?.invoke(p0.localClassName, "onActivityStarted")
+        callback?.invoke(p0.localClassName, "started")
     }
 
     override fun onActivityDestroyed(p0: Activity) {
-        callback?.invoke(p0.localClassName, "onActivityDestroyed")
+        callback?.invoke(p0.localClassName, "destroyed")
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle?) {
-        callback?.invoke(p0.localClassName, "onActivitySaveInstanceState")
+        callback?.invoke(p0.localClassName, "saveInstanceState")
     }
 
     override fun onActivityStopped(p0: Activity) {
-        callback?.invoke(p0.localClassName, "onActivityStopped")
+        callback?.invoke(p0.localClassName, "stopped")
     }
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
-        callback?.invoke(p0.localClassName, "onActivityCreated")
+        callback?.invoke(p0.localClassName, "created")
     }
 
 
