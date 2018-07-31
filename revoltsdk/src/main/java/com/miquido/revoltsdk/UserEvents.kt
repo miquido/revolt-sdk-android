@@ -49,9 +49,9 @@ enum class Gender {
     F, M
 }
 
-fun buildUserSignInEvent(appUserId: String) : Event =
+fun buildUserSignedInEvent(appUserId: String) : Event =
         RevoltEvent("user.signedIn", "appUserId" to appUserId)
 
-fun buildUserSignOutEvent(appUserId: String) : Event =
+fun buildUserSignedOutEvent(appUserId: String) : Event =
         RevoltEvent("user.signedOut", "appUserId" to appUserId)
 

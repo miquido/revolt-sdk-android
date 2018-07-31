@@ -2,7 +2,7 @@ package com.miquido.revolt
 
 import com.facebook.stetho.Stetho
 import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.internal.RevoltLifecycleEventsManager
+import com.miquido.revoltsdk.RevoltActivityLifecycleCallbacks
 import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class RevoltApplication : DaggerApplication() {
     override fun onCreate() {
         super.onCreate()
         Stetho.initializeWithDefaults(this)
-        RevoltLifecycleEventsManager(revoltSDK, this).start()
+        registerActivityLifecycleCallbacks(RevoltActivityLifecycleCallbacks(revoltSDK))
     }
 
 }

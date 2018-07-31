@@ -2,7 +2,6 @@ package com.miquido.revoltsdk
 
 import android.Manifest
 import android.content.Context
-import com.miquido.revoltsdk.internal.ActivitiesChangesGenerator
 import com.miquido.revoltsdk.internal.RevoltService
 import com.miquido.revoltsdk.internal.ScreenSizeProvider
 import com.miquido.revoltsdk.internal.AppInstanceDataEventGenerator
