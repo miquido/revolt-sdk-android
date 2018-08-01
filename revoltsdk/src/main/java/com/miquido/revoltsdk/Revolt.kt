@@ -42,6 +42,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         )
         val backendRepository = BackendRepository(revoltApiBuilder.getRevoltApi())
         val databaseRepository = DatabaseRepository(DatabaseBuilder(context).getEventsDao())
+
         revoltService = RevoltService(revoltConfiguration.eventDelayMillis,
                 revoltConfiguration.maxBatchSize,
                 backendRepository,
@@ -54,6 +55,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         RevoltLogger.init(revoltConfiguration.logLevel)
 
         startSession()
+
     }
 
     /**

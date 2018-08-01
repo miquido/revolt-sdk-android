@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("Revolt-SDK", " before events + ${System.currentTimeMillis()}")
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE1-${rand()}", "a", "b"))
             revoltSDK.sendEvent(RevoltEvent("MY_TYPE2-${rand()}", "a", "b"))
-            revoltSDK.sendEvent(buildUserSignInEvent("12345"))
+            revoltSDK.sendEvent(buildUserSignedInEvent("12345"))
             revoltSDK.sendEvent(buildUserProfileEvent("12345")
                     .birthYear(1990)
                     .gender(Gender.M)
@@ -36,8 +36,8 @@ class MainActivity : AppCompatActivity() {
                             "weightKg" to 70,
                             "eyeColor" to "blue")
                     .build())
-            revoltSDK.sendEvent(buildUserSignOutEvent("12345"))
-            Log.d("Revolt-SDK damian", " after events + ${System.currentTimeMillis()}")
+            revoltSDK.sendEvent(buildUserSignedOutEvent("12345"))
+            Log.d("Revolt-SDK", " after events + ${System.currentTimeMillis()}")
         }
 
         sendCustomButton.setOnClickListener {
