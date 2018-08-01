@@ -1,8 +1,8 @@
 package com.miquido.revolt
 
 import android.content.Context
-import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.RevoltLogLevel
+import rocks.revolt.Revolt
+import rocks.revolt.RevoltLogLevel
 import dagger.Module
 import dagger.Provides
 import java.util.concurrent.TimeUnit

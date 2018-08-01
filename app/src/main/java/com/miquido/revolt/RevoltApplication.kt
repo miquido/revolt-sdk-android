@@ -1,8 +1,8 @@
 package com.miquido.revolt
 
 import com.facebook.stetho.Stetho
-import com.miquido.revoltsdk.Revolt
-import com.miquido.revoltsdk.RevoltActivityLifecycleCallbacks
+import rocks.revolt.Revolt
+import rocks.revolt.RevoltActivityLifecycleCallbacks
 import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 import javax.inject.Inject

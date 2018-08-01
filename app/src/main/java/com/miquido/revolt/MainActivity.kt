@@ -3,7 +3,7 @@ package com.miquido.revolt
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.miquido.revoltsdk.*
+import rocks.revolt.*
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
