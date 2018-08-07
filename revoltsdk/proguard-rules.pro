@@ -29,3 +29,29 @@
 -keepattributes Signature
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
+
+
+-keep class rocks.revolt.Event {*;}
+-keep class rocks.revolt.Revolt {*;}
+-keep class rocks.revolt.Revolt$** {*;}
+-keep class rocks.revolt.RevoltActivityLifecycleCallbacks {*;}
+-keep class rocks.revolt.RevoltLogger {*;}
+-keep class rocks.revolt.RevoltLogLevel {*;}
+-keep class rocks.revolt.UIActivityEvents {*;}
+-keep class rocks.revolt.UserEvents {*;}
+-keep class rocks.revolt.internal.EventModel {*;}
+-keep class rocks.revolt.internal.MetaDataModel {*;}
+-keep class rocks.revolt.internal.network.SendEventResponse {*;}
+-keepattributes InnerClasses
+
+
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+# A resource is loaded with a relative path so the package of this class must be preserved.
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+
+-dontwarn com.google.errorprone.annotations.**
+-keep class com.google.errorprone.annotations.** { *; }

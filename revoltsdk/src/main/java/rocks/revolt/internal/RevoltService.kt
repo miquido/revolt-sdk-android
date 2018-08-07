@@ -109,6 +109,7 @@ internal class RevoltService(private val eventDelayMillis: Long,
         RevoltLogger.d("Response status: ${result.responseStatus}")
         when (result.responseStatus) {
             SendEventsResult.Status.OK -> {
+                RevoltLogger.d("Events accepted: ${result.eventsAccepted}")
                 databaseRepository.removeEvents(result.eventsAccepted)
                 clearRetryData()
             }

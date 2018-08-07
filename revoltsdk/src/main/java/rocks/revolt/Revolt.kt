@@ -29,7 +29,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
     companion object {
-        fun builder(): BuilderContext {
+        @JvmStatic fun builder(): BuilderContext {
             return BuilderContext()
         }
     }
