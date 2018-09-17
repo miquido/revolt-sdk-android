@@ -39,6 +39,7 @@
 -keep class rocks.revolt.RevoltLogLevel {*;}
 -keep class rocks.revolt.UIActivityEvents {*;}
 -keep class rocks.revolt.UserEvents {*;}
+-keep class rocks.revolt.RevoltEvent {*;}
 -keep class rocks.revolt.internal.EventModel {*;}
 -keep class rocks.revolt.internal.MetaDataModel {*;}
 -keep class rocks.revolt.internal.network.SendEventResponse {*;}

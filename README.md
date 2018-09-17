@@ -6,7 +6,7 @@ Usage of the Revolt SDK library, to provide event tracking.
 In build.gradle of your Android application module (usually $projectRoot/app/build.gradle) add the following in the dependencies section:
 ```
 dependencies   {
-
+    implementation 'rocks.revolt:revolt-sdk-android:1.0.1'
 }
 ```
 
@@ -36,6 +36,12 @@ Note that you don't have to add these permissions to manifest of your applicatio
 ##Sending events
 
 Events can be send with sendEvent method which is asynchronous. Method is expecting Event interface which contains getJson method returning JsonObject and getType method returning type of the event.
+RevoltEvent class is described below and provides most common usage samples. 
+Example:
+
+```
+revoltSDK.sendEvent(RevoltEvent("Type", "a", "b"))
+```
 
 ##Creating events
 RevoltEvent class provides 4 constructors that allows you to create events.
@@ -68,6 +74,17 @@ val revoltEvent = RevoltEvent("type", "aaa" to “bbb”, “ccc” to “ddd”
 #Lifecycle events
 
 Revolt allows to handle lifecycle events connected with activity changes such as: create, resume, pause, stop and onSaveInstanceState. To enable it, use RevoltLifecycleEventsManager, which is expecting Revolt class implementation and context.
+
+Example:
+```
+Revolt.builder()
+       .with(context)
+       .trackingId("trackingId")
+       .secretKey("secretKey")
+       .build()
+       
+registerActivityLifecycleCallbacks(RevoltActivityLifecycleCallbacks(rev))       
+```
 
 #Logging
 

@@ -46,12 +46,11 @@ publishing {
             from components.android
             groupId project.group
             artifactId project.artifactId
-            version '1.0.0'
+            version '1.0.1'
             pom.withXml {
                 def root = asNode()
                 root.appendNode('name', project.pubName)
                 root.appendNode('description', project.pubDescription)
-                //root.appendNode('url', gitUrl)
                 root.children().last() + pomConfig
             }
         }
@@ -72,15 +71,13 @@ bintray {
         name = project.artifactId
         desc = project.description
         websiteUrl = siteUrl
-        //vcsUrl = gitUrl
         licenses = allLicenses
         publicDownloadNumbers = true
-        //githubRepo = 'qubitdigital/qubit-sdk-android'
         githubReleaseNotesFile = 'README.md'
         version {
-            name = '1.0.0'
+            name = '1.0.1'
             released = new Date()
-            vcsTag = 'version-' + '1.0.0'
+            vcsTag = 'version-' + '1.0.1'
         }
     }
 }
