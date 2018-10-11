@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 internal object DefaultConfiguration {
-    const val URL: String = "https://api.revolt.rocks/api/v1"
     const val MAX_BATCH_SIZE: Int = 20
     const val EVENT_DELAY_MILLIS = 5_000L
     const val OFFLINE_MAX_SIZE: Int = 10_000

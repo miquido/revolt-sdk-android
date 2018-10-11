@@ -24,6 +24,7 @@ class AppModule {
                 .with(context)
                 .trackingId("revolttest")
                 .secretKey("ZjdMyTrmjVDC8Wr8")
+                .endpoint("https://api.revolt.rocks/api/v1")
                 .eventDelay(5, TimeUnit.SECONDS)
                 .maxBatchSize(10)
                 .logLevel(RevoltLogLevel.DEBUG)

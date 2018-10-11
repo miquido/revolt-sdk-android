@@ -43,6 +43,7 @@
 -keep class rocks.revolt.internal.EventModel {*;}
 -keep class rocks.revolt.internal.MetaDataModel {*;}
 -keep class rocks.revolt.internal.network.SendEventResponse {*;}
+-keep class rocks.revolt.UserProfileEventBuilder {*;}
 -keepattributes InnerClasses
 
 

@@ -29,7 +29,8 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
     private val configurationRepository: ConfigurationRepository = ConfigurationRepository(context)
 
     companion object {
-        @JvmStatic fun builder(): BuilderContext {
+        @JvmStatic
+        fun builder(): BuilderContext {
             return BuilderContext()
         }
     }
@@ -85,19 +86,26 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
     class BuilderSecretKey(private val context: Context,
                            private val trackingId: String) {
-        fun secretKey(secretKey: String): Builder {
-            return Builder(context, trackingId, secretKey)
+        fun secretKey(secretKey: String): BuilderEndpoint {
+            return BuilderEndpoint(context, trackingId, secretKey)
         }
     }
 
+    class BuilderEndpoint(private val context: Context,
+                          private val trackingId: String,
+                          private val secretKey: String) {
+        fun endpoint(endpoint: String): Builder {
+            return Builder(context, trackingId, secretKey, endpoint)
+        }
+    }
 
     class Builder(private val context: Context,
                   private val trackingId: String,
-                  private val secretKey: String) {
+                  private val secretKey: String,
+                  private val endpoint: String) {
         private var maxBatchSize: Int = DefaultConfiguration.MAX_BATCH_SIZE
         private var eventDelayMillis = DefaultConfiguration.EVENT_DELAY_MILLIS
         private var offlineMaxSize: Int = DefaultConfiguration.OFFLINE_MAX_SIZE
-        private var endpoint: String = DefaultConfiguration.URL
         private var revoltLogLevel = DefaultConfiguration.LOG_LEVEL
         private var firstRetryTimeSeconds = DefaultConfiguration.FIRST_RETRY_TIME_SECONDS
         private var maxRetryTimeSeconds = DefaultConfiguration.MAX_RETRY_TIME_SECONDS
@@ -129,11 +137,6 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
 
         fun offlineQueueMaxSize(size: Int): Revolt.Builder {
             this.offlineMaxSize = size
-            return this
-        }
-
-        fun endpoint(endpoint: String): Revolt.Builder {
-            this.endpoint = endpoint
             return this
         }
 
