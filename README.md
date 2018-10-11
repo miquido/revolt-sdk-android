@@ -90,6 +90,24 @@ registerActivityLifecycleCallbacks(RevoltActivityLifecycleCallbacks(rev))
 
 You can specify which level of logs from SDK do you prefer to print in Logcat. You can do it during initialization. The default log level is WARN. You can turn off logs by setting SILENT log level.
 
+#Login and Logout events
+
+There are two methods which allow creating events connected with user login and logout events. Those events can be created using buildUserSignedInEvent and buildUserSignedOutEvent methods.
+
+
+Example:
+```
+val signedInEvent = buildUserSignedInEvent("12345")
+
+val signedOutEvent = buildUserSignedOutEvent("12345")
+
+
+
+revoltSDK.sendEvent(signedInEvent)
+
+revoltSDK.sendEvent(signedOutEvent)
+```
+
 #Custom Parameters
 
 There are few parameters which can be set up during initialization:
