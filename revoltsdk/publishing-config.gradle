@@ -8,6 +8,8 @@ ext {
 
     siteUrl = 'https://www.revolt.rocks'
 
+    versionName = '1.0.4'
+
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
@@ -46,7 +48,7 @@ publishing {
             from components.android
             groupId project.group
             artifactId project.artifactId
-            version '1.0.5'
+            version versionName
             pom.withXml {
                 def root = asNode()
                 root.appendNode('name', project.pubName)
@@ -75,9 +77,9 @@ bintray {
         publicDownloadNumbers = true
         githubReleaseNotesFile = 'README.md'
         version {
-            name = '1.0.5'
+            name = versionName
             released = new Date()
-            vcsTag = 'version-' + '1.0.5'
+            vcsTag = 'version-' + versionName
         }
     }
 }
