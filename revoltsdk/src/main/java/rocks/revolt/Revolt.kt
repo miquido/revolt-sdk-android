@@ -56,7 +56,7 @@ class Revolt private constructor(revoltConfiguration: RevoltConfiguration,
         RevoltLogger.init(revoltConfiguration.logLevel)
 
         startSession()
-
+        RevoltLogger.d("Revolt has been initialized")
     }
 
     /**

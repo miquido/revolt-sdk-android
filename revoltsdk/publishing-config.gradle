@@ -46,7 +46,7 @@ publishing {
             from components.android
             groupId project.group
             artifactId project.artifactId
-            version '1.0.2'
+            version '1.0.5'
             pom.withXml {
                 def root = asNode()
                 root.appendNode('name', project.pubName)
@@ -75,9 +75,9 @@ bintray {
         publicDownloadNumbers = true
         githubReleaseNotesFile = 'README.md'
         version {
-            name = '1.0.2'
+            name = '1.0.5'
             released = new Date()
-            vcsTag = 'version-' + '1.0.2'
+            vcsTag = 'version-' + '1.0.5'
         }
     }
 }

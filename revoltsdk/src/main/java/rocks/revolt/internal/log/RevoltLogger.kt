@@ -81,7 +81,7 @@ internal object RevoltLogger {
         return logLevel >= revoltLogLevel
     }
 
-    private fun formatLog(message: String) = "[${threadName()}] $message"
+    private fun formatLog(message: String) = "[${threadName()},ms: ${System.currentTimeMillis()}] $message"
 
     private fun threadName() = Thread.currentThread().name.padEnd(12).substring(0, 12)
 }

@@ -13,8 +13,9 @@ class RevoltActivityLifecycleCallbacks(val revolt: Revolt) : Application.Activit
     override fun onActivityCreated(activity: Activity, bundle: Bundle?) =
             sendEventToRevolt { buildUIActivityCreatedEvent(activity) }
 
-    override fun onActivityDestroyed(activity: Activity) =
-            sendEventToRevolt { buildUIActivityDestroyedEvent(activity) }
+    override fun onActivityDestroyed(activity: Activity) {
+        sendEventToRevolt { buildUIActivityDestroyedEvent(activity) }
+    }
 
     override fun onActivityStarted(activity: Activity) =
             sendEventToRevolt { buildUIActivityStartedEvent(activity) }
