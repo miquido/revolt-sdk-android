@@ -24,7 +24,7 @@ class LollipopNetworkStateService(context: Context) : NetworkStateService(contex
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .build()
 
-        manager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+        manager?.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
             override fun onLost(network: Network?) {
                 onNetworkStateChanged()
             }
@@ -37,7 +37,7 @@ class LollipopNetworkStateService(context: Context) : NetworkStateService(contex
     }
 
     override fun isConnected(): Boolean {
-        return manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
+        return manager?.allNetworks?.any { manager.getNetworkInfo(it)?.isConnected ?: false } ?: false
     }
 
     private fun onNetworkStateChanged() {

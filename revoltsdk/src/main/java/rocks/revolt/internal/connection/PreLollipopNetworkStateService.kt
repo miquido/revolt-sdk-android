@@ -21,7 +21,7 @@ class PreLollipopNetworkStateService(private val context: Context) : NetworkStat
     }
 
     override fun isConnected(): Boolean {
-        val netInfo = manager.activeNetworkInfo
+        val netInfo = manager?.activeNetworkInfo
         return netInfo != null && netInfo.isConnected
     }
 

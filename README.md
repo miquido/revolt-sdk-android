@@ -6,7 +6,7 @@ Usage of the Revolt SDK library, to provide event tracking.
 In build.gradle of your Android application module (usually $projectRoot/app/build.gradle) add the following in the dependencies section:
 ```
 dependencies   {
-    implementation 'rocks.revolt:revolt-sdk-android:1.0.1'
+    implementation 'rocks.revolt:revolt-sdk-android:1.0.4'
 }
 ```
 
@@ -18,7 +18,7 @@ Revolt.builder()
        .with(context)
        .trackingId("trackingId")
        .secretKey("secretKey")
-        .build()
+       .build()
 ```
         
 ##Permissions

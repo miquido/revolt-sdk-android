@@ -8,7 +8,7 @@ import android.net.ConnectivityManager
  * Copyright 2018 MiQUiDO <http://www.miquido.com/>. All rights reserved.
  */
 abstract class NetworkStateService(context: Context) {
-    protected val manager: ConnectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    protected val manager: ConnectivityManager? = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     protected var networkStateCallback: ((Boolean) -> Unit)? = null
 
     abstract fun start()
