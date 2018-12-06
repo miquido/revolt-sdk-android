@@ -37,7 +37,7 @@ class LollipopNetworkStateService(context: Context) : NetworkStateService(contex
     }
 
     override fun isConnected(): Boolean {
-        return manager.allNetworks.any { manager.getNetworkInfo(it).isConnected }
+        return manager.allNetworks.any { manager.getNetworkInfo(it)?.isConnected ?: false }
     }
 
     private fun onNetworkStateChanged() {
