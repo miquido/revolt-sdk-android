@@ -8,7 +8,8 @@ import com.google.gson.JsonObject
 import rocks.revolt.BuildConfig
 import rocks.revolt.Event
 import rocks.revolt.RevoltEvent
-import java.util.Locale
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 /** Created by MiQUiDO on 03.07.2018.
  * <p>
@@ -34,11 +35,19 @@ internal class AppInstanceDataEventGenerator(private val screenSizeProvider: Scr
                 addProperty("os", "android")
                 addProperty("osVersion", Build.VERSION.RELEASE)
                 addProperty("language", Locale.getDefault().toString())
+                addProperty("zoneOffset", computeZoneOffset())
             })
             add("mobileDevice", JsonObject().apply {
                 addProperty("deviceId", Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID))
             })
         }
         return RevoltEvent("system.appInstanceData", jsonObject)
+    }
+
+
+    private fun computeZoneOffset(): Long {
+        val timeZone = GregorianCalendar().timeZone
+        val offsetMillis = timeZone.rawOffset + if (timeZone.inDaylightTime(Date())) timeZone.dstSavings else 0
+        return TimeUnit.MINUTES.convert(offsetMillis.toLong(), TimeUnit.MILLISECONDS)
     }
 }
